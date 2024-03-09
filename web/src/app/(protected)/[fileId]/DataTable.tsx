@@ -1,30 +1,9 @@
 "use client";
 import { cn } from "@/lib/utils";
 import { CSVFile } from "@/types";
-import { useState } from "react";
 import PerfectScrollbar from "react-perfect-scrollbar";
 
 const DataTable = ({ data }: { data: CSVFile }) => {
-    const [columns, setColumns] = useState<string[]>(() => {
-        return data.cols.map((col) => col.name);
-    });
-    const [values, setValues] = useState<string[][]>(() => {
-        const dataSize = data.cols.length;
-        const rowSize = data.cols[0].values.length;
-        const arr = [];
-        for (let i = 0; i < rowSize; i++) {
-            const row = [];
-            for (let j = 0; j < dataSize; j++) {
-                row.push(
-                    data.cols[j].values[i] != null
-                        ? (data.cols[j].values[i].value as string)
-                        : ""
-                );
-            }
-            arr.push(row);
-        }
-        return arr;
-    });
     return (
         <div
             className="m-2 w-full h-full"
@@ -35,18 +14,9 @@ const DataTable = ({ data }: { data: CSVFile }) => {
                         return (
                             <div
                                 key={index}
-                                className=" flex flex-col text-white  w-auto rounded-e-lg">
+                                className=" flex flex-col text-white  w-auto rounded-e-lg cursor-pointer">
                                 <div className="flex flex-row justify-center items-center min-w-20 bg-slate-500 border ">
-                                    <input
-                                        className="bg-transparent"
-                                        value={columns[index]}
-                                        type="text"
-                                        onChange={(e) => {
-                                            const newColumns = [...columns];
-                                            newColumns[index] = e.target.value;
-                                            setColumns(newColumns);
-                                        }}
-                                    />
+                                    {col.name}
                                 </div>
                                 <div className="border">
                                     {col.values.map((val, index2) => {
@@ -66,29 +36,7 @@ const DataTable = ({ data }: { data: CSVFile }) => {
                                                             : "bg-slate-600"
                                                     }`
                                                 )}>
-                                                {values.length > 0 &&
-                                                values[0].length > 0 ? (
-                                                    <input
-                                                        type="text"
-                                                        className="bg-transparent"
-                                                        value={
-                                                            values[index2][
-                                                                index
-                                                            ]
-                                                        }
-                                                        onChange={(e) => {
-                                                            const newValues = [
-                                                                ...values,
-                                                            ];
-                                                            newValues[index2][
-                                                                index
-                                                            ] = e.target.value;
-                                                            setValues(
-                                                                newValues
-                                                            );
-                                                        }}
-                                                    />
-                                                ) : null}
+                                                {val.value as string}
                                             </div>
                                         );
                                     })}

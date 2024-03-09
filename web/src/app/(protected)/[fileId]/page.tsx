@@ -57,7 +57,6 @@ const generateMockData = () => {
         csvCol[i].values[randomRow].value = null;
         csvCol[i].values[randomRow].type = "row_null";
     }
-    console.log(randomRow, randomCol);
     const CSVData: CSVFile = {
         name: generateRandomText(5),
         id: generateRandomText(5),

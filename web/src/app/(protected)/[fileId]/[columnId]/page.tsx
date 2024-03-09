@@ -23,7 +23,6 @@ const generateMockData = () => {
     for (let j = 0; j < rows; j++) {
         const random = Math.floor(Math.random() * 10);
         const randomCount = Math.floor(Math.random() * 20);
-        console.log(randomCount);
         if (random < 2) {
             csvCol.push({
                 value: null,
@@ -79,13 +78,25 @@ const groupByData = (data: CSVColumnDetailed) => {
     return parsedData;
 };
 
-const Page = () => {
+const Page = ({
+    params: { fileId, columnId },
+}: {
+    params: {
+        fileId: string;
+        columnId: string;
+    };
+}) => {
     const data = generateMockData();
     const groupedData = groupByData(data);
     return (
         <div className="w-full h-full">
             <div className="w-full h-full flex justify-center items-center">
-                <Visual data={data} groupedData={groupedData} />
+                <Visual
+                    data={data}
+                    groupedData={groupedData}
+                    title={fileId}
+                    col={columnId}
+                />
             </div>
         </div>
     );

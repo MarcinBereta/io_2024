@@ -22,7 +22,6 @@ export async function middleware(request: NextRequest) {
     const isAuthRoute = authRoutes.includes(fixedRoute);
 
     if (fixedRoute == "/") {
-        console.log("/ssss");
         return NextResponse.redirect(
             new URL(`${DEFAULT_LOGIN_REDIRECT}`, nextUrl)
         );
@@ -33,8 +32,6 @@ export async function middleware(request: NextRequest) {
     }
 
     if (isAuthRoute) {
-        console.log("/1222222222222");
-
         if (isLoggedIn) {
             return NextResponse.redirect(
                 new URL(`/${DEFAULT_LOGIN_REDIRECT}`, nextUrl)
@@ -43,8 +40,6 @@ export async function middleware(request: NextRequest) {
     }
 
     if (!isLoggedIn && !isPublicRoute && !isAuthRoute) {
-        console.log("/432442");
-
         let callbackUrl = nextUrl.pathname;
         if (nextUrl.search) {
             callbackUrl += nextUrl.search;
