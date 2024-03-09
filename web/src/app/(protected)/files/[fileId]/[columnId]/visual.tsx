@@ -6,6 +6,7 @@ import { BarChart } from "@tremor/react";
 import { compare } from "bcryptjs";
 import { useState } from "react";
 import PerfectScrollbar from "react-perfect-scrollbar";
+import { useRouter } from "next/navigation";
 
 const dataFormatter = (number: number) =>
     Intl.NumberFormat("us").format(number).toString();
@@ -24,6 +25,8 @@ const Visual = ({
     title: string;
     col: string;
 }) => {
+    const router = useRouter();
+
     const compareContext = useCompareContext();
     const [varName, setVarName] = useState(col);
     const [isCompareOpen, setIsCompareOpen] = useState(false);
@@ -65,9 +68,9 @@ const Visual = ({
                             className="text-white p-3 rounded hover:border-gray-600 text-xl w-full bg-slate-300"
                             onClick={() => {
                                 if (isCompared) {
-                                    compareContext.removeCompare(col, col);
+                                    compareContext.removeCompare(title, col);
                                 } else {
-                                    compareContext.addCompare(col, col);
+                                    compareContext.addCompare(title, col);
                                 }
                             }}>
                             {isCompared ? "Remove from compare" : "Compare"}
@@ -102,6 +105,15 @@ const Visual = ({
                                         value={values[index2]}
                                         onChange={(e) => {
                                             const newValues = [...values];
+                                            if (data.type == "number") {
+                                                if (
+                                                    isNaN(
+                                                        Number(e.target.value)
+                                                    )
+                                                ) {
+                                                    return;
+                                                }
+                                            }
                                             newValues[index2] = e.target.value;
                                             setValues(newValues);
                                         }}
@@ -157,6 +169,20 @@ const Visual = ({
                                     0 ? (
                                     <div
                                         key={key}
+                                        onClick={() => {
+                                            let path = "?";
+                                            compareContext.compares[
+                                                key
+                                            ].forEach((val, index) => {
+                                                path += `col${
+                                                    index + 1
+                                                }=${val}&`;
+                                            });
+                                            path = path.slice(0, -1);
+                                            router.push(
+                                                `/compare/${title}${path}`
+                                            );
+                                        }}
                                         className="text-white cursor-pointer p-2 ">
                                         {key}
                                         {compareContext.compares[key].map(

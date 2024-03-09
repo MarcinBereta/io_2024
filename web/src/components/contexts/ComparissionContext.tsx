@@ -29,10 +29,12 @@ const ComparisonWrapper = ({ children }: { children: React.ReactNode }) => {
     const addCompare = async (fileId: string, compare: string) => {
         const compared = { ...compares };
         if (compared[fileId]) {
+            if (compared[fileId].length == 2) compared[fileId].shift();
             compared[fileId].push(compare);
         } else {
             compared[fileId] = [compare];
         }
+
         setCompares(compared);
 
         await localStorage.setItem("compares", JSON.stringify(compared));

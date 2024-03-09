@@ -16,13 +16,33 @@ const generateRandomText = (length: number) => {
     return result;
 };
 
+function shuffle(array: CSVValue[]) {
+    let currentIndex = array.length,
+        randomIndex;
+
+    // While there remain elements to shuffle.
+    while (currentIndex > 0) {
+        // Pick a remaining element.
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+
+        // And swap it with the current element.
+        [array[currentIndex], array[randomIndex]] = [
+            array[randomIndex],
+            array[currentIndex],
+        ];
+    }
+
+    return array;
+}
+
 const generateMockData = () => {
-    const rows = 10;
+    const rows = 200;
     const csvCol: CSVValue[] = [];
 
     for (let j = 0; j < rows; j++) {
         const random = Math.floor(Math.random() * 10);
-        const randomCount = Math.floor(Math.random() * 20);
+        const randomCount = Math.floor(Math.random() * 50);
         if (random < 2) {
             csvCol.push({
                 value: null,
@@ -30,7 +50,8 @@ const generateMockData = () => {
             });
             continue;
         } else {
-            const text = generateRandomText(20);
+            // const text = generateRandomText(20);
+            const text = (Math.random() * 10).toFixed(4);
             for (let j = 0; j < randomCount; j++) {
                 csvCol.push({
                     value: text,
@@ -39,11 +60,11 @@ const generateMockData = () => {
             }
         }
     }
-
+    const shuffled = shuffle(csvCol);
     const csvDetails: CSVColumnDetailed = {
         name: "Mockdata",
-        type: "string",
-        values: csvCol,
+        type: "number",
+        values: shuffled,
         details: [
             {
                 name: "test",
@@ -75,7 +96,9 @@ const groupByData = (data: CSVColumnDetailed) => {
         return { name: key, count: groupedData[key] };
     });
 
-    return parsedData;
+    const sortedData = parsedData.sort((a, b) => b.count - a.count);
+
+    return sortedData;
 };
 
 const Page = ({

@@ -1,8 +1,10 @@
 "use client";
 
+import { useCurrentUser } from "@/hooks/use-current-user";
 import { useRef } from "react";
 
 const FileForm = () => {
+    const user = useCurrentUser();
     const fileRef = useRef<HTMLInputElement>(null);
 
     const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -19,6 +21,7 @@ const FileForm = () => {
         }
         const form = new FormData();
         form.append("file", file);
+        form.append("userId", user?.id || "");
         // const res = await fetch("localhost:4000/files", {
         //     method: "POST",
         //     headers: {
