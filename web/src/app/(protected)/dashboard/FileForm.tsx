@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useRef } from "react";
 
 const FileForm = () => {
-    const router = useRouter()
+    const router = useRouter();
     const user = useCurrentUser();
     const fileRef = useRef<HTMLInputElement>(null);
 
@@ -30,9 +30,8 @@ const FileForm = () => {
         });
 
         const data = await res.json();
-        console.log(data.fileId);
-        router.push(`/file/${data.fileId}`)
-        
+        // console.log(data.fileId);
+        router.push(`/files/${data.fileId}`);
     };
 
     return (

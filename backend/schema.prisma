@@ -1,11 +1,10 @@
-
 generator client {
   provider = "prisma-client-py"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = "postgres://root:zaq1@WSX@localhost:5433/io2024?schema=io2024"
+  url      = "postgres://root:zaq1@WSX@localhost:5432/io2024?schema=io2024"
 }
 
 model Account {
@@ -23,7 +22,7 @@ model Account {
 
   @@unique([providerId, providerAccountId])
 }
- 
+
 model Session {
   id           String   @id @default(cuid())
   userId       String
@@ -46,8 +45,7 @@ model User {
   password      String?
   accounts      Account[]
   sessions      Session[]
-    files CSVFile[]
-
+  files         CSVFile[]
 }
 
 model VerificationRequest {
@@ -61,12 +59,10 @@ model VerificationRequest {
   @@unique([identifier, token])
 }
 
-
-model CSVFile{
-    id String @id @default(uuid())
-    name String
-    path String
-    user User @relation(fields: [userId], references: [id])
-    userId String
+model CSVFile {
+  id     String @id @default(uuid())
+  name   String
+  path   String
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
 }
-

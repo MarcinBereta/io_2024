@@ -4,17 +4,51 @@ from prisma import Prisma, register
 from werkzeug.utils import secure_filename
 import os
 import uuid
+import csv
 
-csv = Blueprint('csv', __name__)
+csv_route = Blueprint('csv', __name__)
 STORAGE_CSV = '.\static'
 db = Prisma()
 register(db)
 ALLOWED_EXTENSIONS = {'csv'}
 
+csvs = {}
+
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@csv.route('/csv', methods=['POST'])
+
+def handle_csv(fileId, path, filename):
+    with open(path, 'r', encoding="utf8") as csv_file:
+        reader = csv.reader(csv_file)
+        data = {}
+        dataKeys = []
+        for i, row in enumerate(reader):
+            rowArr = row[0].split(';')
+            if i == 0:
+                data = {key: [] for key in rowArr}
+                dataKeys = rowArr
+            else:
+                for j, key in enumerate(rowArr):
+                    data[dataKeys[j]].append({
+                        "value":key,
+                        "type":"normal" if key is not None else "null"
+                    })
+        csvs[fileId] = {
+            "cols": [{
+                "name": key,
+                "type":"string",
+                "values": data[key]
+            } for key in data],
+            "name": filename,
+            "id:": fileId
+        }
+        print(csvs)
+        # csvs[fileId] = data
+
+
+@csv_route.route('/csv', methods=['POST'])
 async def upload_csv():
     print(request.headers)
     if 'file' not in request.files or 'userId' not in request.form:
@@ -44,20 +78,29 @@ async def upload_csv():
                         "path": os.path.join(path, filename),
                     }
                 )
-                print(csv_file)
+
+                returnObject = {
+                    "message": "File uploaded",
+                    "fileId": csv_file.id
+                }
+                handle_csv(csv_file.id, os.path.join(path, filename), filename)
+
+                return returnObject, 200
             finally:
                 await db.disconnect()
 
             return {"message": "File uploaded", "fileId": str(unique_fileid)}, 200
-@csv.route('/csv/<userId>', methods=['GET'])
-async def get_csv(userId):#one csv
+
+
+@csv_route.route('/csv/<fileId>', methods=['GET'])
+async def get_csv(fileId):  # one csv
     try:
-        await db.connect()
-        csv_file = await CSVFile.prisma().find_first(
-            where={"userId": userId}
-        )
-        print(csv_file.path.replace('\\','/'))
-        return send_from_directory(csv_file.path.replace('\\','/').strip(csv_file.name)[1:], csv_file.name)
+        # await db.connect()
+        # csv_file = await CSVFile.prisma().find_unique(
+        #     where={"fileId": fileId}
+        # )
+        # print(csv_file)
+        return csvs[fileId]
 
     finally:
         await db.disconnect()

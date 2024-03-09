@@ -5,9 +5,9 @@ from flask_cors import CORS  # Import the CORS module
 os.makedirs('.\static', exist_ok=True)
 app = Flask(__name__)
 CORS(app)
-from routes.csv import csv
+from routes.csv import csv_route
 
-app.register_blueprint(csv)
+app.register_blueprint(csv_route)
 
 if __name__ == '__main__':
     app.run(debug=True, port=4000)

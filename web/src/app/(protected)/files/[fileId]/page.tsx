@@ -65,14 +65,14 @@ const generateMockData = () => {
     return CSVData;
 };
 const Page = async ({
-    params: { userId },
+    params: { fileId },
 }: {
     params: {
-        userId: string;
+        fileId: string;
     };
 }) => {
     //const data = generateMockData();
-    const res = await fetch(`http://127.0.0.1:4000/csv/${userId}`);
+    const res = await fetch(`http://127.0.0.1:4000/csv/${fileId}`);
     const data = (await res.json()) as CSVFile;
     console.log(data);
     return (

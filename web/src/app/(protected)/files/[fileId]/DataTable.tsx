@@ -11,6 +11,7 @@ const DataTable = ({ data }: { data: CSVFile }) => {
             <PerfectScrollbar className="w-full h-full">
                 <div className="flex flex-row ml-2">
                     {data.cols.map((col, index) => {
+                        console.log(col);
                         return (
                             <div
                                 key={index}
