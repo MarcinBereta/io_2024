@@ -64,9 +64,17 @@ const generateMockData = () => {
     };
     return CSVData;
 };
-
-const Page = () => {
-    const data = generateMockData();
+const Page = async ({
+    params: { userId },
+}: {
+    params: {
+        userId: string;
+    };
+}) => {
+    //const data = generateMockData();
+    const res = await fetch(`http://127.0.0.1:4000/csv/${userId}`);
+    const data = (await res.json()) as CSVFile;
+    console.log(data);
     return (
         <div className="w-full h-full">
             <div className="w-full h-full flex justify-center items-center">

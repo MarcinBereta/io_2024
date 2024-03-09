@@ -1,9 +1,11 @@
 "use client";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useRouter } from "next/navigation";
 import { useRef } from "react";
 
 const FileForm = () => {
+    const router = useRouter()
     const user = useCurrentUser();
     const fileRef = useRef<HTMLInputElement>(null);
 
@@ -22,13 +24,15 @@ const FileForm = () => {
         const form = new FormData();
         form.append("file", file);
         form.append("userId", user?.id || "");
-        // const res = await fetch("localhost:4000/files", {
-        //     method: "POST",
-        //     headers: {
-        //         "Content-Type": "multipart/form-data",
-        //     },
-        //     body: form,
-        // });
+        const res = await fetch("http://127.0.0.1:4000/csv", {
+            method: "POST",
+            body: form,
+        });
+
+        const data = await res.json();
+        console.log(data.fileId);
+        router.push(`/file/${data.fileId}`)
+        
     };
 
     return (
