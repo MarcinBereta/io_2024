@@ -5,15 +5,21 @@ from werkzeug.utils import secure_filename
 import os
 import uuid
 import csv
+import shutil
 
 csv_route = Blueprint('csv', __name__)
 STORAGE_CSV = '.\static'
 db = Prisma()
 register(db)
 ALLOWED_EXTENSIONS = {'csv'}
-
 csvs = {}
 
+def is_float(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -32,13 +38,14 @@ def handle_csv(fileId, path, filename):
             else:
                 for j, key in enumerate(rowArr):
                     data[dataKeys[j]].append({
-                        "value":key,
-                        "type":"normal" if key is not None else "null"
+                        "value": key,
+                        "type": "normal" if key is not None else "null"
                     })
+        print(data)
         csvs[fileId] = {
             "cols": [{
                 "name": key,
-                "type":"string",
+                "type": "number" if all(value['value'].isnumeric() or is_float(value['value']) or value['value']=='' for value in data[key] ) else "string" ,
                 "values": data[key]
             } for key in data],
             "name": filename,
@@ -64,8 +71,7 @@ async def upload_csv():
             path = os.path.join(STORAGE_CSV, request.form['userId'], unique_fileid)
             os.makedirs(path, exist_ok=True)
             file.save(os.path.join(path, filename))
-            file.save(os.path.join(path, filename.strip(".csv") + "_orignal" + ".csv"))
-
+            shutil.copy(os.path.join(path, filename), os.path.join(path, filename.strip('.csv') + "_original" + ".csv"))
             try:
                 await db.connect()
                 await CSVFile.prisma().delete_many(
@@ -89,7 +95,7 @@ async def upload_csv():
             finally:
                 await db.disconnect()
 
-            return {"message": "File uploaded", "fileId": str(unique_fileid)}, 200
+            # return {"message": "File uploaded", "fileId": str(unique_fileid)}, 200
 
 
 @csv_route.route('/csv/<fileId>', methods=['GET'])
@@ -104,3 +110,39 @@ async def get_csv(fileId):  # one csv
 
     finally:
         await db.disconnect()
+
+
+@csv_route.route('/csv/<userId>/<fileId>/edit/fixColls', methods=['POST'])
+async def fix_colls(userId, fileId):
+    try:
+        empty_columns = []
+        cols = csvs[fileId]["cols"]
+        for column in cols:
+            if all(value["value"] == "" for value in column["values"]):
+                empty_columns.append(column)
+        for column in empty_columns:
+            cols.remove(column)
+        return csvs[fileId]
+    except Exception as e:
+        return {"error": str(e)}, 400
+
+@csv_route.route('/csv/<userId>/<fileId>/data/<columnName>/updateAvg', methods=['POST'])
+async def update_avg(userId, fileId, columnName):
+    try:
+
+        for column in csvs[fileId]["cols"]:
+            if column["name"] == columnName:
+                if column['type'] == "number":
+                    values = [float(value["value"]) for value in column["values"] if value["value"] != ""]
+                    print(values)
+                    avg = sum(values) / len(values)
+                    avg = round(avg, 2)
+                    for value in column["values"]:
+                        if value["value"] == "":
+                            value["value"] = str(avg)
+
+                    return csvs[fileId]
+                else:
+                    return {"error": "Column is not a number type"}, 400
+    except Exception as e:
+        return {"error, columnd not exist": str(e)}, 400
