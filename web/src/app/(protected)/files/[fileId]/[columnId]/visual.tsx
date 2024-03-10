@@ -3,7 +3,6 @@ import { useCompareContext } from "@/components/contexts/ComparissionContext";
 import { cn } from "@/lib/utils";
 import { CSVColumnDetailed } from "@/types";
 import { BarChart } from "@tremor/react";
-import { compare } from "bcryptjs";
 import { useState } from "react";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import { useRouter } from "next/navigation";
@@ -28,6 +27,7 @@ const Visual = ({
     const router = useRouter();
 
     const compareContext = useCompareContext();
+    const [fixedValue, setFixedValue] = useState("");
     const [varName, setVarName] = useState(col);
     const [isCompareOpen, setIsCompareOpen] = useState(false);
     const [values, setValues] = useState(() => {
@@ -48,10 +48,150 @@ const Visual = ({
         }
     });
 
+    const generateButtons = (): React.ReactNode[] => {
+        const arr: React.ReactNode[] = [];
+        const address = "127.0.0.1:4000/csv";
+        if (data.type == "number") {
+            arr.push(
+                <div
+                    key="fix"
+                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/4 cursor-pointer"
+                    onClick={async () => {
+                        const res = await fetch(
+                            `${address}/files/${title}/fixes/${col}/normalize`
+                        );
+                        if (res.status == 200 || res.status == 201)
+                            router.refresh();
+                    }}>
+                    Normalize
+                </div>
+            );
+            arr.push(
+                <div
+                    key="normalize"
+                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/4 cursor-pointer"
+                    onClick={async () => {
+                        const res = await fetch(
+                            `${address}/files/${title}/fixes/${col}/average`
+                        );
+                        if (res.status == 200 || res.status == 201)
+                            router.refresh();
+                    }}>
+                    Set average
+                </div>
+            );
+            arr.push(
+                <div
+                    key="normalize"
+                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/4 cursor-pointer"
+                    onClick={async () => {
+                        const res = await fetch(
+                            `${address}/files/${title}/fixes/${col}/median`
+                        );
+                        if (res.status == 200 || res.status == 201)
+                            router.refresh();
+                    }}>
+                    Set median
+                </div>
+            );
+            arr.push(
+                <div
+                    key="normalize"
+                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/4 cursor-pointer"
+                    onClick={async () => {
+                        const res = await fetch(
+                            `${address}/files/${title}/fixes/${col}/mostcommon`
+                        );
+                        if (res.status == 200 || res.status == 201)
+                            router.refresh();
+                    }}>
+                    Set most common value
+                </div>
+            );
+            arr.push(
+                <div className="flex flex-row p-2 space-x-2  w-1/2">
+                    <input
+                        className="bg-slate-500 rounded-md  text-white w-1/2"
+                        type="text"
+                        placeholder="Set constant value"
+                        value={fixedValue}
+                        onChange={(e) => setFixedValue(e.target.value)}
+                    />
+                    <div
+                        key="normalize"
+                        className="text-white p-2 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/2 cursor-pointer"
+                        onClick={async () => {
+                            const res = await fetch(
+                                `/files/${title}/fixes/${col}/fixed/${fixedValue}`
+                            );
+                             if (res.status == 200 || res.status == 201)
+                                 router.refresh();
+                        }}>
+                        Fixed value
+                    </div>
+                </div>
+            );
+        } else if (data.type == "text") {
+            arr.push(
+                <div
+                    key="fix"
+                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/4 cursor-pointer"
+                    onClick={async () => {
+                        const res = await fetch(
+                            `${address}/files/${title}/fixes/${col}/normalize`
+                        );
+                        if (res.status == 200 || res.status == 201)
+                            router.refresh();
+                    }}>
+                    Normalize
+                </div>
+            );
+            arr.push(
+                <div
+                    key="normalize"
+                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/4 cursor-pointer"
+                    onClick={async () => {
+                        const res = await fetch(
+                            `${address}/files/${title}/fixes/${col}/mostcommon`
+                        );
+                        if (res.status == 200 || res.status == 201)
+                            router.refresh();
+                    }}>
+                    Set most common value
+                </div>
+            );
+            arr.push(
+                <div className="flex flex-row p-2 space-x-2  w-1/2">
+                    <input
+                        className="bg-slate-500 rounded-md  text-white w-1/2"
+                        type="text"
+                        placeholder="Set constant value"
+                        value={fixedValue}
+                        onChange={(e) => setFixedValue(e.target.value)}
+                    />
+                    <div
+                        key="normalize"
+                        className="text-white p-2 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/2 cursor-pointer"
+                        onClick={async () => {
+                            const res = await fetch(
+                                `/files/${title}/fixes/${col}/fixed/${fixedValue}`
+                            );
+                            if (res.status == 200 || res.status == 201)
+                                router.refresh();
+                        }}>
+                        Fixed value
+                    </div>
+                </div>
+            );
+        }
+
+        return arr;
+    };
+
     return (
         <div
             className="flex flex-col w-full h-full"
-            style={{ maxHeight: "calc(80vh - 2.5rem)" }}>
+            style={{ maxHeight: "calc(70vh - 2.5rem)" }}>
             <div className="flex flex-row">
                 <div className="flex flex-col text-white">
                     <div className=" text-2xl">{title}</div>
@@ -65,7 +205,7 @@ const Visual = ({
                 <div>
                     <div>
                         <button
-                            className="text-white p-3 rounded hover:border-gray-600 text-xl w-full bg-slate-300"
+                            className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 w-full"
                             onClick={() => {
                                 if (isCompared) {
                                     compareContext.removeCompare(title, col);
@@ -81,7 +221,7 @@ const Visual = ({
             <div className="flex flex-row w-full">
                 <div
                     className=" w-1/4 h-full"
-                    style={{ maxHeight: "calc(80vh - 2.5rem)" }}>
+                    style={{ maxHeight: "calc(70vh - 2.5rem)" }}>
                     <PerfectScrollbar>
                         {data.values.map((val, index2) => {
                             return (
@@ -101,7 +241,7 @@ const Visual = ({
                                     )}>
                                     <input
                                         type="text"
-                                        className="bg-transparent"
+                                        className="bg-transparent text-center w-full"
                                         value={values[index2]}
                                         onChange={(e) => {
                                             const newValues = [...values];
@@ -124,6 +264,9 @@ const Visual = ({
                     </PerfectScrollbar>
                 </div>
                 <div className="flex flex-col w-3/4 h-full items-center">
+                    <div className=" flex flex-wrap flex-row gap-2 p-2">
+                        {generateButtons()}
+                    </div>
                     <div className="flex flex-row gap-4 flex-wrap w-3/4 justify-center">
                         {data.details.map((detail) => {
                             return (

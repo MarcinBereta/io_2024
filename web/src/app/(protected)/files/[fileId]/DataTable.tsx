@@ -1,13 +1,44 @@
 "use client";
 import { cn } from "@/lib/utils";
 import { CSVFile } from "@/types";
+import { useRouter } from "next/navigation";
 import PerfectScrollbar from "react-perfect-scrollbar";
 
-const DataTable = ({ data }: { data: CSVFile }) => {
+const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
+    const router = useRouter();
+    const handleClick = async (type: "rows" | "cols") => {
+        const res = await fetch(`http://127.0.0.1:4000/csv/${file}/fix${type}`);
+        if (res.status == 200 || res.status == 201) {
+            router.refresh();
+        }
+    };
+
     return (
         <div
             className="m-2 w-full h-full"
-            style={{ maxHeight: "calc(80vh - 2.5rem)" }}>
+            style={{ maxHeight: "calc(70vh - 2.5rem)" }}>
+            <div>
+                <h1 className="text-3xl text-white">CSV Data</h1>
+                <div>
+                    <h2 className="text-xl text-white">Name: {data.name}</h2>
+                </div>
+            </div>
+            <div className="flex flex-row justify-around my-2">
+                <div
+                    className="flex p-2 text-white cursor-pointer bg-slate-500 rounded-2xl"
+                    onClick={() => {
+                        handleClick("cols");
+                    }}>
+                    Remove empty columns
+                </div>
+                <div
+                    className="flex p-2 text-white cursor-pointer bg-slate-500 rounded-2xl"
+                    onClick={() => {
+                        handleClick("rows");
+                    }}>
+                    Remove empty rows
+                </div>
+            </div>
             <PerfectScrollbar className="w-full h-full">
                 <div className="flex flex-row ml-2">
                     {data.cols.map((col, index) => {
@@ -15,6 +46,9 @@ const DataTable = ({ data }: { data: CSVFile }) => {
                         return (
                             <div
                                 key={index}
+                                onClick={() => {
+                                    router.push(`/files/${file}/${col.name}`);
+                                }}
                                 className=" flex flex-col text-white  w-auto rounded-e-lg cursor-pointer">
                                 <div className="flex flex-row justify-center items-center min-w-20 bg-slate-500 border ">
                                     {col.name}
