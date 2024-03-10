@@ -14,6 +14,12 @@ register(db)
 ALLOWED_EXTENSIONS = {'csv'}
 csvs = {}
 
+def is_float(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -35,10 +41,11 @@ def handle_csv(fileId, path, filename):
                         "value": key,
                         "type": "normal" if key is not None else "null"
                     })
+        print(data)
         csvs[fileId] = {
             "cols": [{
                 "name": key,
-                "type": "string",
+                "type": "number" if all(value['value'].isnumeric() or is_float(value['value']) or value['value']=='' for value in data[key] ) else "string" ,
                 "values": data[key]
             } for key in data],
             "name": filename,
@@ -118,3 +125,24 @@ async def fix_colls(userId, fileId):
         return csvs[fileId]
     except Exception as e:
         return {"error": str(e)}, 400
+
+@csv_route.route('/csv/<userId>/<fileId>/data/<columnName>/updateAvg', methods=['POST'])
+async def update_avg(userId, fileId, columnName):
+    try:
+
+        for column in csvs[fileId]["cols"]:
+            if column["name"] == columnName:
+                if column['type'] == "number":
+                    values = [float(value["value"]) for value in column["values"] if value["value"] != ""]
+                    print(values)
+                    avg = sum(values) / len(values)
+                    avg = round(avg, 2)
+                    for value in column["values"]:
+                        if value["value"] == "":
+                            value["value"] = str(avg)
+
+                    return csvs[fileId]
+                else:
+                    return {"error": "Column is not a number type"}, 400
+    except Exception as e:
+        return {"error, columnd not exist": str(e)}, 400
