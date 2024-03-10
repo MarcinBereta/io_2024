@@ -5,13 +5,12 @@ from werkzeug.utils import secure_filename
 import os
 import uuid
 import csv
-
+import shutil
 csv_route = Blueprint('csv', __name__)
 STORAGE_CSV = '.\static'
 db = Prisma()
 register(db)
 ALLOWED_EXTENSIONS = {'csv'}
-
 csvs = {}
 
 
@@ -32,13 +31,13 @@ def handle_csv(fileId, path, filename):
             else:
                 for j, key in enumerate(rowArr):
                     data[dataKeys[j]].append({
-                        "value":key,
-                        "type":"normal" if key is not None else "null"
+                        "value": key,
+                        "type": "normal" if key is not None else "null"
                     })
         csvs[fileId] = {
             "cols": [{
                 "name": key,
-                "type":"string",
+                "type": "string",
                 "values": data[key]
             } for key in data],
             "name": filename,
@@ -64,8 +63,7 @@ async def upload_csv():
             path = os.path.join(STORAGE_CSV, request.form['userId'], unique_fileid)
             os.makedirs(path, exist_ok=True)
             file.save(os.path.join(path, filename))
-            file.save(os.path.join(path, filename.strip(".csv") + "_orignal" + ".csv"))
-
+            shutil.copy(os.path.join(path, filename), os.path.join(path, filename.strip('.csv') + "_original" + ".csv"))
             try:
                 await db.connect()
                 await CSVFile.prisma().delete_many(
@@ -90,7 +88,6 @@ async def upload_csv():
                 await db.disconnect()
 
             return {"message": "File uploaded", "fileId": str(unique_fileid)}, 200
-
 
 @csv_route.route('/csv/<fileId>', methods=['GET'])
 async def get_csv(fileId):  # one csv
