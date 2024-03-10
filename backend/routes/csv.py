@@ -6,6 +6,7 @@ import os
 import uuid
 import csv
 import shutil
+
 csv_route = Blueprint('csv', __name__)
 STORAGE_CSV = '.\static'
 db = Prisma()
@@ -87,7 +88,8 @@ async def upload_csv():
             finally:
                 await db.disconnect()
 
-            return {"message": "File uploaded", "fileId": str(unique_fileid)}, 200
+            # return {"message": "File uploaded", "fileId": str(unique_fileid)}, 200
+
 
 @csv_route.route('/csv/<fileId>', methods=['GET'])
 async def get_csv(fileId):  # one csv
@@ -101,3 +103,18 @@ async def get_csv(fileId):  # one csv
 
     finally:
         await db.disconnect()
+
+
+@csv_route.route('/csv/<userId>/<fileId>/edit/fixColls', methods=['POST'])
+async def fix_colls(userId, fileId):
+    try:
+        empty_columns = []
+        cols = csvs[fileId]["cols"]
+        for column in cols:
+            if all(value["value"] == "" for value in column["values"]):
+                empty_columns.append(column)
+        for column in empty_columns:
+            cols.remove(column)
+        return csvs[fileId]
+    except Exception as e:
+        return {"error": str(e)}, 400
