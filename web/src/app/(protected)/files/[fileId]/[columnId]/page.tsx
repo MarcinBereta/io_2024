@@ -101,7 +101,7 @@ const groupByData = (data: CSVColumnDetailed) => {
     return sortedData;
 };
 
-const Page = ({
+const Page = async ({
     params: { fileId, columnId },
 }: {
     params: {
@@ -109,6 +109,10 @@ const Page = ({
         columnId: string;
     };
 }) => {
+    const res = await fetch(
+        `http://localhost:4000/csv/${fileId}/data/${columnId}`
+    );
+    // const data = await res.json();
     const data = generateMockData();
     const groupedData = groupByData(data);
     return (

@@ -124,8 +124,8 @@ const Visual = ({
                             const res = await fetch(
                                 `/files/${title}/fixes/${col}/fixed/${fixedValue}`
                             );
-                             if (res.status == 200 || res.status == 201)
-                                 router.refresh();
+                            if (res.status == 200 || res.status == 201)
+                                router.refresh();
                         }}>
                         Fixed value
                     </div>
@@ -184,6 +184,27 @@ const Visual = ({
                 </div>
             );
         }
+        arr.push(
+            <div
+                key="update"
+                className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/4 cursor-pointer"
+                onClick={async () => {
+                    const res = await fetch(
+                        `${address}/files/${title}/fixes/${col}`,
+                        {
+                            method: "PUT",
+                            body: JSON.stringify({
+                                name: varName,
+                                values: values,
+                            }),
+                        }
+                    );
+                    if (res.status == 200 || res.status == 201)
+                        router.refresh();
+                }}>
+                Update
+            </div>
+        );
 
         return arr;
     };
