@@ -73,11 +73,11 @@ const Page = async ({
 }) => {
     // const data = generateMockData();
     const res = await fetch(`http://127.0.0.1:4000/csv/${fileId}`, {
-        cache:'no-store'
+        cache: "no-store",
     });
     const data = (await res.json()) as CSVFile;
     // console.log(data)
-    console.log(new Date())
+    console.log(new Date());
     return (
         <div className="w-full h-full">
             <div className="w-full h-full flex justify-center items-center">

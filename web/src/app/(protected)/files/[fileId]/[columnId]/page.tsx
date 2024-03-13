@@ -109,12 +109,16 @@ const Page = async ({
         columnId: string;
     };
 }) => {
+    console.log(`http://127.0.0.1:4000/csv/${fileId}/data/${columnId}`);
     const res = await fetch(
-        `http://localhost:4000/csv/${fileId}/data/${columnId}`,{
-        cache:'no-store'
-    }
+        `http://127.0.0.1:4000/csv/${fileId}/data/${columnId}`,
+        {
+            cache: "no-store",
+            method: "GET",
+        }
     );
     const data = await res.json();
+    console.log(data);
     // const data = generateMockData();
     const groupedData = groupByData(data);
     return (

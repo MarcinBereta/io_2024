@@ -9,6 +9,7 @@ import uuid
 import csv
 import shutil
 from copy import deepcopy
+
 csv_route = Blueprint('csv', __name__)
 STORAGE_CSV = '.\static'
 db = Prisma()
@@ -26,8 +27,21 @@ Do zrobienia + poprawa poprzednich aby działały w polaczeniu z frontem
 
 
 def is_float(s):
+    if s is None:
+        return False
     try:
         float(s)
+        return True
+    except ValueError:
+        return False
+
+
+def is_int(s):
+    if s is None:
+        return False
+
+    try:
+        int(s)
         return True
     except ValueError:
         return False
@@ -45,24 +59,25 @@ def is_date(string):
         return False
 
 
-def set_type(key):
-    if key.isalpha():
-        return "string"
-    elif key.isnumeric() or is_float(key):
-        return "number"
-    elif key == "":
-        return "null"
-    elif is_date(key):
-        return "date"
+def parse_value(v):
+    if v == "":
+        return [None, "null"]
+    try:
+        return [int(v), "normal"]
+    except ValueError:
+        try:
+            return [float(v), "normal"]
+        except ValueError:
+            return [v, "normal"]
 
 
 def set_column_type(column):
-    # if all(value['value'].isnumeric() or is_float(value['value']) or value['value'].isalpha() for value in column):
-    #     return "normal"
-    if all(value['value'] == "" for value in column):
+    if all(value['value'] == "" for value in column) or all(value['value'] == None for value in column):
         return "col_null"
+    elif any(is_float(value['value']) or is_int(value['value']) for value in column):
+        return "number"
     else:
-        return "null"
+        return "text"
 
 
 def handle_csv(fileId, path, filename):
@@ -73,19 +88,24 @@ def handle_csv(fileId, path, filename):
         for i, row in enumerate(reader):
             rowArr = row[0].split(';')
             if i == 0:
-                data = {key: [] for key in rowArr}
-                dataKeys = rowArr
+                keys = [key for key in rowArr]
+                keysParsed = [key.replace(" ", "_").replace("/", "(or)") for key in keys]
+                data = {key: [] for key in keysParsed}
+                dataKeys = keysParsed
             else:
                 for j, key in enumerate(rowArr):
+                    parsedValue, valueType = parse_value(key)
                     data[dataKeys[j]].append({
-                        "value": key,
-                        "type": set_type(key)
+                        "value": parsedValue,
+                        "type": valueType
                     })
         csvs[fileId] = {
             "cols": [{
                 "name": key,
                 "type": set_column_type(data[key]),
-                "values": data[key]
+                "values": data[key],
+                "details": [],
+                "graphs": []
             } for key in data],
             "name": filename,
             "id:": fileId
@@ -115,17 +135,15 @@ async def upload_csv():
             shutil.copy(os.path.join(path, filename), os.path.join(path, filename.strip('.csv') + "_original" + ".csv"))
             try:
                 await db.connect()
-                await CSVFile.prisma().delete_many(
-                    where={"userId": request.form['userId']}
-                )
-                csv_file = await CSVFile.prisma().create(
+
+                csv_file = await db.csvfile.create(
                     data={
+                        "id": unique_fileid,
                         "userId": request.form['userId'],
                         "name": filename,
                         "path": os.path.join(path, filename),
                     }
                 )
-
                 returnObject = {
                     "message": "File uploaded",
                     "fileId": unique_fileid
@@ -133,6 +151,9 @@ async def upload_csv():
                 handle_csv(unique_fileid, os.path.join(path, filename), filename)
 
                 return returnObject, 200
+            except Exception as e:
+                print("CHUYJ")
+                return {"error": str(e)}, 400
             finally:
                 await db.disconnect()
 
@@ -142,35 +163,53 @@ async def upload_csv():
 @csv_route.route('/csv/<fileId>', methods=['GET'])
 async def get_csv(fileId):  # one csv
     # try:
-        # await db.connect()
-        # csv_file = await CSVFile.prisma().find_unique(
-        #     where={"fileId": fileId}
-        # )
-        # print(csv_file)
-        # print("DATA: ", csvs[fileId])
+    # await db.connect()
+    # csv_file = await CSVFile.prisma().find_unique(
+    #     where={"fileId": fileId}
+    # )
+    # print(csv_file)
+    # print("DATA: ", csvs[fileId])
+    try:
         return csvs[fileId]
+    except Exception as e:
+        await db.connect()
+        try:
+            csv_file = await db.csvfile.find_unique(
+                where={"id": fileId}
+            )
+            handle_csv(fileId, csv_file.path, csv_file.name)
+            return csvs[fileId]
+        except:
+            return {"error": "File not found"}, 400
+        finally:
+            await db.disconnect()
+    return csvs[fileId]
+
 
 @csv_route.route('/csv/<fileId>/data/<colId>', methods=['GET'])
 async def get_csv_col(fileId, colId):  # one csv
-    # try:
-        # await db.connect()
-        # csv_file = await CSVFile.prisma().find_unique(
-        #     where={"fileId": fileId}
-        # )
-        # print(csv_file)
-        # print("DATA: ", csvs[fileId])
-        print(fileId, colId)
-        print(csvs)
-        csvFile  = csvs[fileId]
-        for col in csvFile["cols"]:
-            if col["name"] == colId:
-                newCol = col.deepcopy(); # dict has no deepcopy
-                newCol['details'] = []
-                newCol['graphs']=[]
-                return newCol
-    # ex
-    # finally:
-    #     await db.disconnect()
+    try:
+        csvFile = csvs[fileId]
+    except Exception as e:
+        await db.connect()
+        try:
+            csv_file = await db.csvfile.find_unique(
+                where={"id": fileId}
+            )
+            handle_csv(fileId, csv_file.path, csv_file.name)
+            csvFile =  csvs[fileId]
+        except:
+            return {"error": "File not found"}, 400
+        finally:
+            await db.disconnect()
+    for col in csvFile["cols"]:
+        if col["name"] == colId:
+            return col
+
+
+# ex
+# finally:
+#     await db.disconnect()
 
 
 @csv_route.route('/csv/<fileId>/data/<columnName>', methods=['GET'])
@@ -200,7 +239,6 @@ async def fix_cols(fileId):
         return csvs[fileId]
     except Exception as e:
         return {"error": str(e) + "Nie znaleziono takiej kolumny"}, 400
-
 
 
 @csv_route.route('/csv/<fileId>/fixrows', methods=['GET'])

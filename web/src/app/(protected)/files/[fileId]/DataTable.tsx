@@ -1,10 +1,10 @@
 "use client";
-import {cn} from "@/lib/utils";
-import {CSVFile} from "@/types";
-import {useRouter} from "next/navigation";
+import { cn } from "@/lib/utils";
+import { CSVFile } from "@/types";
+import { useRouter } from "next/navigation";
 import PerfectScrollbar from "react-perfect-scrollbar";
 
-const DataTable = ({data, file}: { data: CSVFile; file: string }) => {
+const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
     const router = useRouter();
     const handleClick = async (type: "rows" | "cols") => {
         const res = await fetch(`http://127.0.0.1:4000/csv/${file}/fix${type}`);
@@ -18,7 +18,7 @@ const DataTable = ({data, file}: { data: CSVFile; file: string }) => {
     return (
         <div
             className="m-2 w-full h-full"
-            style={{maxHeight: "calc(70vh - 2.5rem)"}}>
+            style={{ maxHeight: "calc(70vh - 2.5rem)" }}>
             <div>
                 <h1 className="text-3xl text-white">CSV Data</h1>
                 <div>
@@ -51,9 +51,12 @@ const DataTable = ({data, file}: { data: CSVFile; file: string }) => {
                                     router.push(`/files/${file}/${col.name}`);
                                 }}
                                 className=" flex flex-col text-white  w-auto rounded-e-lg cursor-pointer">
-                                <div
-                                    className="flex flex-row justify-center items-center min-w-20 bg-slate-500 border ">
-                                    {col.name}
+                                <div className="flex flex-row justify-center items-center min-w-20 bg-slate-500 border ">
+                                    {col.name
+                                        .replace("_", " ")
+                                        .replace("(or)", "/")
+                                        .replace("_", " ")
+                                        .replace("/_", "/ ")}
                                 </div>
                                 <div className="border">
                                     {col.values.map((val, index2) => {
@@ -66,11 +69,11 @@ const DataTable = ({data, file}: { data: CSVFile; file: string }) => {
                                                         val.type == "row_null"
                                                             ? "bg-slate-400"
                                                             : val.type ==
-                                                            "col_null"
-                                                                ? "bg-slate-500"
-                                                                : val.type == "null"
-                                                                    ? "bg-slate-700"
-                                                                    : "bg-slate-600"
+                                                              "col_null"
+                                                            ? "bg-slate-500"
+                                                            : val.type == "null"
+                                                            ? "bg-slate-700"
+                                                            : "bg-slate-600"
                                                     }`
                                                 )}>
                                                 {val.value as string}
@@ -86,4 +89,4 @@ const DataTable = ({data, file}: { data: CSVFile; file: string }) => {
         </div>
     );
 };
-export {DataTable};
+export { DataTable };
