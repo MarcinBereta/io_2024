@@ -110,10 +110,12 @@ const Page = async ({
     };
 }) => {
     const res = await fetch(
-        `http://localhost:4000/csv/${fileId}/data/${columnId}`
+        `http://localhost:4000/csv/${fileId}/data/${columnId}`,{
+        cache:'no-store'
+    }
     );
-    // const data = await res.json();
-    const data = generateMockData();
+    const data = await res.json();
+    // const data = generateMockData();
     const groupedData = groupByData(data);
     return (
         <div className="w-full h-full">

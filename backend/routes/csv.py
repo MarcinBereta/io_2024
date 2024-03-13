@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import Blueprint, request, redirect, flash, url_for, send_from_directory
 from prisma.models import CSVFile
 from prisma import Prisma, register
@@ -6,14 +8,14 @@ import os
 import uuid
 import csv
 import shutil
-
+from copy import deepcopy
 csv_route = Blueprint('csv', __name__)
 STORAGE_CSV = '.\static'
 db = Prisma()
 register(db)
 ALLOWED_EXTENSIONS = {'csv'}
 csvs = {}
-
+userID = ""
 """
 Do zrobienia + poprawa poprzednich aby działały w polaczeniu z frontem
 /csv/{user}/{id}/data/{zmienna} - PUT update zmiennej do podanej, zwraca nową zmienną  
@@ -21,6 +23,7 @@ Do zrobienia + poprawa poprzednich aby działały w polaczeniu z frontem
 /csv/files/{userId}/{id}/img/{img} - GET wszystkie wykresy itp
 /csv/files/{userId}/{id}/csv/{img} - GET wszystkie csv'ki
 """
+
 
 def is_float(s):
     try:
@@ -32,6 +35,34 @@ def is_float(s):
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def is_date(string):
+    try:
+        datetime.strptime(string, "%Y-%m-%d")
+        return True
+    except ValueError:
+        return False
+
+
+def set_type(key):
+    if key.isalpha():
+        return "string"
+    elif key.isnumeric() or is_float(key):
+        return "number"
+    elif key == "":
+        return "null"
+    elif is_date(key):
+        return "date"
+
+
+def set_column_type(column):
+    # if all(value['value'].isnumeric() or is_float(value['value']) or value['value'].isalpha() for value in column):
+    #     return "normal"
+    if all(value['value'] == "" for value in column):
+        return "col_null"
+    else:
+        return "null"
 
 
 def handle_csv(fileId, path, filename):
@@ -48,21 +79,18 @@ def handle_csv(fileId, path, filename):
                 for j, key in enumerate(rowArr):
                     data[dataKeys[j]].append({
                         "value": key,
-                        "type": "normal" if key is not None else "null"
+                        "type": set_type(key)
                     })
-        print(data)
         csvs[fileId] = {
             "cols": [{
                 "name": key,
-                "type": "number" if all(
-                    value['value'].isnumeric() or is_float(value['value']) or value['value'] == '' for value in
-                    data[key]) else "string",
+                "type": set_column_type(data[key]),
                 "values": data[key]
             } for key in data],
             "name": filename,
             "id:": fileId
         }
-        print(csvs)
+        # print(csvs)
         # csvs[fileId] = data
 
 
@@ -79,6 +107,8 @@ async def upload_csv():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             unique_fileid = str(uuid.uuid4())
+            global userID
+            userID = request.form['userId']
             path = os.path.join(STORAGE_CSV, request.form['userId'], unique_fileid)
             os.makedirs(path, exist_ok=True)
             file.save(os.path.join(path, filename))
@@ -111,16 +141,36 @@ async def upload_csv():
 
 @csv_route.route('/csv/<fileId>', methods=['GET'])
 async def get_csv(fileId):  # one csv
-    try:
+    # try:
         # await db.connect()
         # csv_file = await CSVFile.prisma().find_unique(
         #     where={"fileId": fileId}
         # )
         # print(csv_file)
+        # print("DATA: ", csvs[fileId])
         return csvs[fileId]
 
-    finally:
-        await db.disconnect()
+@csv_route.route('/csv/<fileId>/data/<colId>', methods=['GET'])
+async def get_csv_col(fileId, colId):  # one csv
+    # try:
+        # await db.connect()
+        # csv_file = await CSVFile.prisma().find_unique(
+        #     where={"fileId": fileId}
+        # )
+        # print(csv_file)
+        # print("DATA: ", csvs[fileId])
+        print(fileId, colId)
+        print(csvs)
+        csvFile  = csvs[fileId]
+        for col in csvFile["cols"]:
+            if col["name"] == colId:
+                newCol = col.deepcopy(); # dict has no deepcopy
+                newCol['details'] = []
+                newCol['graphs']=[]
+                return newCol
+    # ex
+    # finally:
+    #     await db.disconnect()
 
 
 @csv_route.route('/csv/<fileId>/data/<columnName>', methods=['GET'])
@@ -136,12 +186,12 @@ async def get_column(fileId, columnName):
         await db.disconnect()
 
 
-@csv_route.route('/csv/<fileId>/fix/fixcols', methods=['POST'])
-async def fix_cols(userId, fileId):
+@csv_route.route('/csv/<fileId>/fixcols', methods=['GET'])
+async def fix_cols(fileId):
     try:
+        print(csvs[fileId], "\n")
         empty_columns = []
         cols = csvs[fileId]["cols"]
-        print(cols)
         for column in cols:
             if all(value["value"] == "" for value in column["values"]):
                 empty_columns.append(column)
@@ -149,11 +199,12 @@ async def fix_cols(userId, fileId):
             cols.remove(column)
         return csvs[fileId]
     except Exception as e:
-        return {"error": str(e)}, 400
+        return {"error": str(e) + "Nie znaleziono takiej kolumny"}, 400
 
 
-@csv_route.route('/csv/<fileId>/fix/fixrows', methods=['POST'])
-async def fix_rows(userId, fileId):
+
+@csv_route.route('/csv/<fileId>/fixrows', methods=['GET'])
+async def fix_rows(fileId):
     try:
         empty_rows = []
         cols = csvs[fileId]["cols"]
@@ -177,27 +228,7 @@ async def fix_rows(userId, fileId):
                     column["values"].pop(i)
         return csvs[fileId]
     except Exception as e:
-        return {"error": str(e)}, 400
-
-
-
-@csv_route.route('/csv/<fileId>', methods=['PUT'])
-async def update_csv(userId, fileId):
-    try:
-        if 'file' not in request.files:
-            return {"error": "No file part"}, 400
-        else:
-            file = request.files['file']
-            if file.filename == '':
-                return {"error": "No selected file"}, 400
-            if file and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                path = os.path.join(STORAGE_CSV, userId, fileId)
-                file.save(os.path.join(path, filename))
-                handle_csv(fileId, os.path.join(path, filename), filename)
-                return {"message": "File updated"}, 200
-    except Exception as e:
-        return {"error": str(e)}, 400
+        return {"error": str(e) + "Nie ma takiego rzędu"}, 400
 
 
 @csv_route.route('/csv/<fileId>/<columnName>/updateConst', methods=['POST'])

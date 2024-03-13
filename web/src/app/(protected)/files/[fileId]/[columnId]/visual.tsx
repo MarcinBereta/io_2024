@@ -25,7 +25,7 @@ const Visual = ({
     col: string;
 }) => {
     const router = useRouter();
-
+    console.log(data)
     const compareContext = useCompareContext();
     const [fixedValue, setFixedValue] = useState("");
     const [varName, setVarName] = useState(col);
