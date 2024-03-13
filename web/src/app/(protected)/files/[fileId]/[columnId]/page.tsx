@@ -109,7 +109,6 @@ const Page = async ({
         columnId: string;
     };
 }) => {
-    console.log(`http://127.0.0.1:4000/csv/${fileId}/data/${columnId}`);
     const res = await fetch(
         `http://127.0.0.1:4000/csv/${fileId}/data/${columnId}`,
         {

@@ -57,7 +57,6 @@ const Visual = ({
     const generateButtons = (): React.ReactNode[] => {
         const arr: React.ReactNode[] = [];
         const address = "127.0.0.1:4000/csv";
-        console.log(data);
         if (data.type == "number") {
             arr.push(
                 <div

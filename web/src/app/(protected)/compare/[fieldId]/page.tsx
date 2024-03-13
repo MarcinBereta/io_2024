@@ -67,13 +67,15 @@ const groupByData = (data: CSVColumnDetailed, data2: CSVColumnDetailed) => {
         count2: number;
     }[] = [];
     data.details.forEach((detail1, index) => {
-        const detail2 = data2.details[index];
-        if (typeof detail1.values === "number")
-            parsedData.push({
-                name: detail1.name,
-                count1: detail1.values as number,
-                count2: detail2.values as number,
-            });
+        if (data2.details[index].name === detail1.name) {
+            const detail2 = data2.details[index];
+            if (typeof detail1.values === "number")
+                parsedData.push({
+                    name: detail1.name,
+                    count1: detail1.values as number,
+                    count2: detail2.values as number,
+                });
+        }
     });
 
     return parsedData;
