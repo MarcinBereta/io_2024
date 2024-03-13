@@ -61,13 +61,19 @@ const generateMockData = () => {
 };
 
 const groupByData = (data: CSVColumnDetailed, data2: CSVColumnDetailed) => {
-    const parsedData = data.details.map((detail1, index) => {
+    const parsedData: {
+        name: string;
+        count1: number;
+        count2: number;
+    }[] = [];
+    data.details.forEach((detail1, index) => {
         const detail2 = data2.details[index];
-        return {
-            name: detail1.name,
-            count1: detail1.values as number,
-            count2: detail2.values as number,
-        };
+        if (typeof detail1.values === "number")
+            parsedData.push({
+                name: detail1.name,
+                count1: detail1.values as number,
+                count2: detail2.values as number,
+            });
     });
 
     return parsedData;
