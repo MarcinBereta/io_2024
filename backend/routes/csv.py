@@ -152,7 +152,6 @@ async def upload_csv():
 
                 return returnObject, 200
             except Exception as e:
-                print("CHUYJ")
                 return {"error": str(e)}, 400
             finally:
                 await db.disconnect()

@@ -47,11 +47,11 @@ const generateMockData = () => {
         details: [
             {
                 name: "test",
-                values: "test",
+                values: Math.floor(Math.random() * 100),
             },
             {
                 name: "test2",
-                values: "test2",
+                values: Math.floor(Math.random() * 100),
             },
         ],
         graphs: [],
@@ -60,19 +60,14 @@ const generateMockData = () => {
     return csvDetails;
 };
 
-const groupByData = (data: CSVColumnDetailed) => {
-    const groupedData: { [key: string]: number } = {};
-    data.values.forEach((value) => {
-        if (value.type === "null") return;
-        if (groupedData.hasOwnProperty(value.value as string)) {
-            groupedData[value.value as string] += 1;
-        } else {
-            groupedData[value.value as string] = 1;
-        }
-    });
-
-    const parsedData = Object.keys(groupedData).map((key) => {
-        return { name: key, count: groupedData[key] };
+const groupByData = (data: CSVColumnDetailed, data2: CSVColumnDetailed) => {
+    const parsedData = data.details.map((detail1, index) => {
+        const detail2 = data2.details[index];
+        return {
+            name: detail1.name,
+            count1: detail1.values as number,
+            count2: detail2.values as number,
+        };
     });
 
     return parsedData;
@@ -92,9 +87,9 @@ const Page = ({
     };
 }) => {
     const data = generateMockData();
-    const groupedData = groupByData(data);
     const data2 = generateMockData();
-    const groupedData2 = groupByData(data);
+
+    const groupedData = groupByData(data, data2);
     return (
         <div className="w-full h-full">
             <div className="w-full h-full flex justify-center items-center">
@@ -102,7 +97,6 @@ const Page = ({
                     data={data}
                     data2={data2}
                     groupedData={groupedData}
-                    groupedData2={groupedData2}
                     title={fieldId}
                     cols={[col1, col2]}
                 />
