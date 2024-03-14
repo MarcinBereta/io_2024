@@ -56,7 +56,7 @@ const Visual = ({
 
     const generateButtons = (): React.ReactNode[] => {
         const arr: React.ReactNode[] = [];
-        const address = "127.0.0.1:4000/csv";
+        const address = "http://127.0.0.1:4000/csv";
         if (data.type == "number") {
             arr.push(
                 <div
@@ -67,10 +67,14 @@ const Visual = ({
                     }}
                     onClick={async () => {
                         const res = await fetch(
-                            `${address}/files/${title}/fixes/${col}/normalize`
+                            `${address}/files/${title}/fixes/${col}/normalize`,{
+                                cache: "no-store",
+                                method: "GET",
+                            }
                         );
                         if (res.status == 200 || res.status == 201)
-                            router.refresh();
+                            // router.refresh();
+                            window.location.reload();
                     }}>
                     Normalize
                 </div>
@@ -85,9 +89,12 @@ const Visual = ({
                     onClick={async () => {
                         const res = await fetch(
                             `${address}/files/${title}/fixes/${col}/average`
-                        );
+                        ,{
+                                cache: "no-store",
+                            });
                         if (res.status == 200 || res.status == 201)
-                            router.refresh();
+                            // router.refresh();
+                            window.location.reload();
                     }}>
                     Set average
                 </div>
@@ -102,9 +109,13 @@ const Visual = ({
                     onClick={async () => {
                         const res = await fetch(
                             `${address}/files/${title}/fixes/${col}/median`
-                        );
+                        ,{
+                                cache: "no-store",
+                                method: "GET",
+                            });
                         if (res.status == 200 || res.status == 201)
-                            router.refresh();
+                            // router.refresh();
+                            window.location.reload();
                     }}>
                     Set median
                 </div>
@@ -119,9 +130,13 @@ const Visual = ({
                     onClick={async () => {
                         const res = await fetch(
                             `${address}/files/${title}/fixes/${col}/mostcommon`
-                        );
+                        ,{
+                                cache: "no-store",
+                                method: "GET",
+                            });
                         if (res.status == 200 || res.status == 201)
-                            router.refresh();
+                            // router.refresh();
+                            window.location.reload();
                     }}>
                     Set most common value
                 </div>
@@ -140,10 +155,14 @@ const Visual = ({
                         className="text-white p-2 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/2 cursor-pointer"
                         onClick={async () => {
                             const res = await fetch(
-                                `/files/${title}/fixes/${col}/fixed/${fixedValue}`
-                            );
+                                `${address}/files/${title}/fixes/${col}/fixed/${fixedValue}`
+                            ,{
+                                cache: "no-store",
+                                method: "GET",
+                            });
                             if (res.status == 200 || res.status == 201)
-                                router.refresh();
+                                // router.refresh();
+                                window.location.reload();
                         }}>
                         Fixed value
                     </div>
@@ -159,10 +178,13 @@ const Visual = ({
                     }}
                     onClick={async () => {
                         const res = await fetch(
-                            `${address}/files/${title}/fixes/${col}/normalize`
+                            `${address}/files/${title}/fixes/${col}/normalize`,{
+                                cache: "no-store",
+                                method: "GET",
+                            }
                         );
                         if (res.status == 200 || res.status == 201)
-                            router.refresh();
+                            window.location.reload();
                     }}>
                     Normalize
                 </div>
@@ -176,10 +198,14 @@ const Visual = ({
                     }}
                     onClick={async () => {
                         const res = await fetch(
-                            `${address}/files/${title}/fixes/${col}/mostcommon`
+                            `${address}/files/${title}/fixes/${col}/mostcommon`,{
+                                cache: "no-store",
+                                method: "GET",
+                            }
                         );
                         if (res.status == 200 || res.status == 201)
-                            router.refresh();
+                            // router.refresh();
+                            window.location.reload();
                     }}>
                     Set most common value
                 </div>
@@ -198,10 +224,14 @@ const Visual = ({
                         className="text-white p-2 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/2 cursor-pointer"
                         onClick={async () => {
                             const res = await fetch(
-                                `/files/${title}/fixes/${col}/fixed/${fixedValue}`
+                                `${address}/files/${title}/fixes/${col}/fixed/${fixedValue}`,{
+                                cache: "no-store",
+                                method: "GET",
+                            }
                             );
                             if (res.status == 200 || res.status == 201)
-                                router.refresh();
+                                // router.refresh();
+                                window.location.reload();
                         }}>
                         Fixed value
                     </div>
@@ -216,6 +246,7 @@ const Visual = ({
                     const res = await fetch(
                         `${address}/files/${title}/fixes/${col}`,
                         {
+                            cache: "no-store",
                             method: "PUT",
                             body: JSON.stringify({
                                 name: varName,

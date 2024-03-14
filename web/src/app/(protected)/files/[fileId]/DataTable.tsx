@@ -7,10 +7,11 @@ import PerfectScrollbar from "react-perfect-scrollbar";
 const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
     const router = useRouter();
     const handleClick = async (type: "rows" | "cols") => {
-        const res = await fetch(`http://127.0.0.1:4000/csv/${file}/fix${type}`);
+        const res = await fetch(`http://127.0.0.1:4000/csv/${file}/fix${type}`,{
+            cache: "no-store",
+        });
         if (res.status == 200 || res.status == 201) {
             console.log("dasjdoqwjdpqd");
-            router.refresh();
             router.refresh();
         }
     };

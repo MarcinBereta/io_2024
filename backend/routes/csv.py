@@ -16,9 +16,7 @@ db = Prisma()
 register(db)
 ALLOWED_EXTENSIONS = {'csv'}
 csvs = {}
-userID = ""
 """
-Do zrobienia + poprawa poprzednich aby działały w polaczeniu z frontem
 /csv/{user}/{id}/data/{zmienna} - PUT update zmiennej do podanej, zwraca nową zmienną  
 /csv/{user}/{id}/data/{zmienna}/updateDetail - POST ustawia puste na określoną rzecz z szczegółów np. mediana średnia itp (to co będzie w details[name] 
 /csv/files/{userId}/{id}/img/{img} - GET wszystkie wykresy itp
@@ -196,7 +194,7 @@ async def get_csv_col(fileId, colId):  # one csv
                 where={"id": fileId}
             )
             handle_csv(fileId, csv_file.path, csv_file.name)
-            csvFile =  csvs[fileId]
+            csvFile = csvs[fileId]
         except:
             return {"error": "File not found"}, 400
         finally:
@@ -227,17 +225,16 @@ async def get_column(fileId, columnName):
 @csv_route.route('/csv/<fileId>/fixcols', methods=['GET'])
 async def fix_cols(fileId):
     try:
-        print(csvs[fileId], "\n")
         empty_columns = []
         cols = csvs[fileId]["cols"]
         for column in cols:
-            if all(value["value"] == "" for value in column["values"]):
+            if all(value["value"] == None for value in column["values"]):
                 empty_columns.append(column)
         for column in empty_columns:
             cols.remove(column)
         return csvs[fileId]
     except Exception as e:
-        return {"error": str(e) + "Nie znaleziono takiej kolumny"}, 400
+        return {"error": str(e)}, 400
 
 
 @csv_route.route('/csv/<fileId>/fixrows', methods=['GET'])
@@ -250,7 +247,7 @@ async def fix_rows(fileId):
             empty_rows.append([])
             i = 0
             for value in column["values"]:
-                if value["value"] == "":
+                if value["value"] == None:
                     empty_rows[-1].append(i)
                 i += 1
             if i > i_max:
@@ -265,40 +262,42 @@ async def fix_rows(fileId):
                     column["values"].pop(i)
         return csvs[fileId]
     except Exception as e:
-        return {"error": str(e) + "Nie ma takiego rzędu"}, 400
+        return {"error": str(e)}, 400
 
 
-@csv_route.route('/csv/<fileId>/<columnName>/updateConst', methods=['POST'])
-async def update_const(userId, fileId, columnName):
+@csv_route.route('/csv/files/<fileId>/fixes/<columnName>/fixed/<fixedValue>', methods=['GET'])
+async def update_const(fileId, columnName, fixedValue):
     try:
         for column in csvs[fileId]["cols"]:
             if column["name"] == columnName:
+
                 if column['type'] == "number":
-                    const = request.json["value"]
+                    fixedValue = float(fixedValue)
+                    print(fixedValue)
                     for value in column["values"]:
-                        if value["value"] == "":
-                            value["value"] = const
+                        if value["value"] == None:
+                            value["value"] = fixedValue
 
                     return csvs[fileId]
 
     except Exception as e:
         return {"error, column not exist": str(e)}, 400
 
-    # `${address}/files/${title}/fixes/${col}/average`
 
 
-@csv_route.route('/csv//<fileId>/<columnName>/updateMedian', methods=['POST'])
-async def update_median(userId, fileId, columnName):
+@csv_route.route('/csv/files/<fileId>/fixes/<columnName>/median', methods=['GET'])
+async def update_median(fileId, columnName):
     try:
         for column in csvs[fileId]["cols"]:
             if column["name"] == columnName:
                 if column['type'] == "number":
-                    values = [float(value["value"]) for value in column["values"] if value["value"] != ""]
+                    values = [float(value["value"]) for value in column["values"] if value["value"] != None]
                     values.sort()
-                    median = values[len(values) // 2]
+                    median = values[len(values) // 2] if len(values) % 2 == 0 else (values[len(values) // 2] + values[len(values) // 2 + 1]) / 2
+                    print(median)
                     for value in column["values"]:
-                        if value["value"] == "":
-                            value["value"] = median
+                        if value["value"] == None:
+                            value["value"] = str(median)
 
                     return csvs[fileId]
 
@@ -306,38 +305,58 @@ async def update_median(userId, fileId, columnName):
         return {"error, column not exist": str(e)}, 400
 
 
-@csv_route.route('/csv/<userId>/<fileId>/data/<columnName>/updateMostCommon', methods=['POST'])
-async def update_most_common(userId, fileId, columnName):
+@csv_route.route('/csv/files/<fileId>/fixes/<columnName>/mostcommon', methods=['GET'])
+async def update_most_common(fileId, columnName):
     try:
         for column in csvs[fileId]["cols"]:
             if column["name"] == columnName:
-                values = [(value["value"]) for value in column["values"] if value["value"] != ""]
+                values = [(value["value"]) for value in column["values"] if value["value"] != None]
                 most_common = ""
                 for i in range(len(values)):
                     if values.count(values[i]) > values.count(most_common):
                         most_common = values[i]
                 for value in column["values"]:
-                    if value["value"] == "":
-                        value["value"] = most_common
+                    if value["value"] is None:
+                        value["value"] = str(most_common)
                 return csvs[fileId]
 
     except Exception as e:
         return {"error, column not exist": str(e)}, 400
 
 
-@csv_route.route('/csv/<fileId>/fixes/<columnName>/upadateAverage', methods=['POST'])
-async def update_avg(userId, fileId, columnName):
+@csv_route.route('/csv/files/<fileId>/fixes/<columnName>/average', methods=['GET'])
+async def update_avg(fileId, columnName):
     try:
         for column in csvs[fileId]["cols"]:
             if column["name"] == columnName:
                 if column['type'] == "number":
-                    values = [float(value["value"]) for value in column["values"] if value["value"] != ""]
-                    print(values)
+                    values = [float(value["value"]) for value in column["values"] if value["value"] != None]
                     avg = sum(values) / len(values)
                     avg = round(avg, 2)
                     for value in column["values"]:
-                        if value["value"] == "":
+                        print(value["value"], avg)
+                        if value["value"] is None:
                             value["value"] = str(avg)
+
+                    return csvs[fileId]
+                else:
+                    return {"error": "Column is not a number type"}, 400
+    except Exception as e:
+        return {"error, columnd not exist": str(e)}, 400
+
+@csv_route.route('/csv/files/<fileId>/fixes/<columnName>/normalize', methods=['GET'])
+async def update_normalize(fileId, columnName):
+    try:
+        for column in csvs[fileId]["cols"]:
+            if column["name"] == columnName:
+                if column['type'] == "number":
+                    values = [float(value["value"]) for value in column["values"] if value["value"] != None]
+                    print(values)
+                    max_value = max(values)
+                    min_value = min(values)
+                    for value in column["values"]:
+                        if value["value"] is not None:
+                            value["value"] = (float(value["value"]) - min_value) / (max_value - min_value) #normalizacja min-max
 
                     return csvs[fileId]
                 else:
