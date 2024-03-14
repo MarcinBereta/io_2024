@@ -69,7 +69,7 @@ const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
                                                     `${
                                                         val.type == "row_null"
                                                             ? "bg-slate-400"
-                                                            : val.type ==
+                                                            : col.type ==
                                                               "col_null"
                                                             ? "bg-slate-500"
                                                             : val.type == "null"

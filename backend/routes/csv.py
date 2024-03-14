@@ -56,6 +56,31 @@ def is_date(string):
     except ValueError:
         return False
 
+def row_null_type_set(fileId):
+    cols = csvs[fileId]["cols"]
+    empty_rows = [set() for _ in range(len(cols))]
+    i_max = max(len(col["values"]) for col in cols)
+
+    for col_idx, column in enumerate(cols):
+        for i, value in enumerate(column["values"]):
+            if value["value"] is None:
+                empty_rows[col_idx].add(i)
+
+    for i in range(i_max):
+        if all(i in empty_rows[col_idx] for col_idx in range(len(cols))):
+            for column in cols:
+                column["values"][i]["type"] = "row_null"
+
+    return csvs[fileId]
+def delete_row_null_type(fileId):
+    cols = csvs[fileId]["cols"]
+    for column in cols:
+        for value in column["values"]:
+            if value["type"] == "row_null":
+                value["type"] = "null"
+    return csvs[fileId]
+
+
 
 def parse_value(v):
     if v == "":
@@ -108,6 +133,7 @@ def handle_csv(fileId, path, filename):
             "name": filename,
             "id:": fileId
         }
+        row_null_type_set(fileId)
         # print(csvs)
         # csvs[fileId] = data
 
@@ -201,6 +227,7 @@ async def get_csv_col(fileId, colId):  # one csv
             await db.disconnect()
     for col in csvFile["cols"]:
         if col["name"] == colId:
+            delete_row_null_type(fileId)
             return col
 
 
@@ -232,6 +259,7 @@ async def fix_cols(fileId):
                 empty_columns.append(column)
         for column in empty_columns:
             cols.remove(column)
+        row_null_type_set(fileId)
         return csvs[fileId]
     except Exception as e:
         return {"error": str(e)}, 400
@@ -277,6 +305,7 @@ async def update_const(fileId, columnName, fixedValue):
                     for value in column["values"]:
                         if value["value"] == None:
                             value["value"] = fixedValue
+                            value["type"] = parse_value(value["value"])
 
                     return csvs[fileId]
 
@@ -298,6 +327,8 @@ async def update_median(fileId, columnName):
                     for value in column["values"]:
                         if value["value"] == None:
                             value["value"] = str(median)
+                            value["type"] = parse_value(value["value"])
+                    delete_row_null_type(fileId)
 
                     return csvs[fileId]
 
@@ -318,6 +349,8 @@ async def update_most_common(fileId, columnName):
                 for value in column["values"]:
                     if value["value"] is None:
                         value["value"] = str(most_common)
+                        value["type"] = parse_value(value["value"])
+                delete_row_null_type(fileId)
                 return csvs[fileId]
 
     except Exception as e:
@@ -337,7 +370,8 @@ async def update_avg(fileId, columnName):
                         print(value["value"], avg)
                         if value["value"] is None:
                             value["value"] = str(avg)
-
+                            value["type"] = parse_value(value["value"])
+                    delete_row_null_type(fileId)
                     return csvs[fileId]
                 else:
                     return {"error": "Column is not a number type"}, 400
