@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import Blueprint, request, redirect, flash, url_for, send_from_directory
 from prisma.models import CSVFile
 from prisma import Prisma, register
@@ -6,6 +8,7 @@ import os
 import uuid
 import csv
 import shutil
+from copy import deepcopy
 
 csv_route = Blueprint('csv', __name__)
 STORAGE_CSV = '.\static'
@@ -13,16 +16,17 @@ db = Prisma()
 register(db)
 ALLOWED_EXTENSIONS = {'csv'}
 csvs = {}
-
 """
-Do zrobienia + poprawa poprzednich aby działały w polaczeniu z frontem
 /csv/{user}/{id}/data/{zmienna} - PUT update zmiennej do podanej, zwraca nową zmienną  
 /csv/{user}/{id}/data/{zmienna}/updateDetail - POST ustawia puste na określoną rzecz z szczegółów np. mediana średnia itp (to co będzie w details[name] 
 /csv/files/{userId}/{id}/img/{img} - GET wszystkie wykresy itp
 /csv/files/{userId}/{id}/csv/{img} - GET wszystkie csv'ki
 """
 
+
 def is_float(s):
+    if s is None:
+        return False
     try:
         float(s)
         return True
@@ -30,8 +34,48 @@ def is_float(s):
         return False
 
 
+def is_int(s):
+    if s is None:
+        return False
+
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
+
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def is_date(string):
+    try:
+        datetime.strptime(string, "%Y-%m-%d")
+        return True
+    except ValueError:
+        return False
+
+
+def parse_value(v):
+    if v == "":
+        return [None, "null"]
+    try:
+        return [int(v), "normal"]
+    except ValueError:
+        try:
+            return [float(v), "normal"]
+        except ValueError:
+            return [v, "normal"]
+
+
+def set_column_type(column):
+    if all(value['value'] == "" for value in column) or all(value['value'] == None for value in column):
+        return "col_null"
+    elif any(is_float(value['value']) or is_int(value['value']) for value in column):
+        return "number"
+    else:
+        return "text"
 
 
 def handle_csv(fileId, path, filename):
@@ -42,27 +86,29 @@ def handle_csv(fileId, path, filename):
         for i, row in enumerate(reader):
             rowArr = row[0].split(';')
             if i == 0:
-                data = {key: [] for key in rowArr}
-                dataKeys = rowArr
+                keys = [key for key in rowArr]
+                keysParsed = [key.replace(" ", "_").replace("/", "(or)") for key in keys]
+                data = {key: [] for key in keysParsed}
+                dataKeys = keysParsed
             else:
                 for j, key in enumerate(rowArr):
+                    parsedValue, valueType = parse_value(key)
                     data[dataKeys[j]].append({
-                        "value": key,
-                        "type": "normal" if key is not None else "null"
+                        "value": parsedValue,
+                        "type": valueType
                     })
-        print(data)
         csvs[fileId] = {
             "cols": [{
                 "name": key,
-                "type": "number" if all(
-                    value['value'].isnumeric() or is_float(value['value']) or value['value'] == '' for value in
-                    data[key]) else "string",
-                "values": data[key]
+                "type": set_column_type(data[key]),
+                "values": data[key],
+                "details": [],
+                "graphs": []
             } for key in data],
             "name": filename,
             "id:": fileId
         }
-        print(csvs)
+        # print(csvs)
         # csvs[fileId] = data
 
 
@@ -79,23 +125,23 @@ async def upload_csv():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             unique_fileid = str(uuid.uuid4())
+            global userID
+            userID = request.form['userId']
             path = os.path.join(STORAGE_CSV, request.form['userId'], unique_fileid)
             os.makedirs(path, exist_ok=True)
             file.save(os.path.join(path, filename))
             shutil.copy(os.path.join(path, filename), os.path.join(path, filename.strip('.csv') + "_original" + ".csv"))
             try:
                 await db.connect()
-                await CSVFile.prisma().delete_many(
-                    where={"userId": request.form['userId']}
-                )
-                csv_file = await CSVFile.prisma().create(
+
+                csv_file = await db.csvfile.create(
                     data={
+                        "id": unique_fileid,
                         "userId": request.form['userId'],
                         "name": filename,
                         "path": os.path.join(path, filename),
                     }
                 )
-
                 returnObject = {
                     "message": "File uploaded",
                     "fileId": unique_fileid
@@ -103,6 +149,8 @@ async def upload_csv():
                 handle_csv(unique_fileid, os.path.join(path, filename), filename)
 
                 return returnObject, 200
+            except Exception as e:
+                return {"error": str(e)}, 400
             finally:
                 await db.disconnect()
 
@@ -111,16 +159,54 @@ async def upload_csv():
 
 @csv_route.route('/csv/<fileId>', methods=['GET'])
 async def get_csv(fileId):  # one csv
+    # try:
+    # await db.connect()
+    # csv_file = await CSVFile.prisma().find_unique(
+    #     where={"fileId": fileId}
+    # )
+    # print(csv_file)
+    # print("DATA: ", csvs[fileId])
     try:
-        # await db.connect()
-        # csv_file = await CSVFile.prisma().find_unique(
-        #     where={"fileId": fileId}
-        # )
-        # print(csv_file)
         return csvs[fileId]
+    except Exception as e:
+        await db.connect()
+        try:
+            csv_file = await db.csvfile.find_unique(
+                where={"id": fileId}
+            )
+            handle_csv(fileId, csv_file.path, csv_file.name)
+            return csvs[fileId]
+        except:
+            return {"error": "File not found"}, 400
+        finally:
+            await db.disconnect()
+    return csvs[fileId]
 
-    finally:
-        await db.disconnect()
+
+@csv_route.route('/csv/<fileId>/data/<colId>', methods=['GET'])
+async def get_csv_col(fileId, colId):  # one csv
+    try:
+        csvFile = csvs[fileId]
+    except Exception as e:
+        await db.connect()
+        try:
+            csv_file = await db.csvfile.find_unique(
+                where={"id": fileId}
+            )
+            handle_csv(fileId, csv_file.path, csv_file.name)
+            csvFile = csvs[fileId]
+        except:
+            return {"error": "File not found"}, 400
+        finally:
+            await db.disconnect()
+    for col in csvFile["cols"]:
+        if col["name"] == colId:
+            return col
+
+
+# ex
+# finally:
+#     await db.disconnect()
 
 
 @csv_route.route('/csv/<fileId>/data/<columnName>', methods=['GET'])
@@ -136,14 +222,13 @@ async def get_column(fileId, columnName):
         await db.disconnect()
 
 
-@csv_route.route('/csv/<fileId>/fix/fixcols', methods=['POST'])
-async def fix_cols(userId, fileId):
+@csv_route.route('/csv/<fileId>/fixcols', methods=['GET'])
+async def fix_cols(fileId):
     try:
         empty_columns = []
         cols = csvs[fileId]["cols"]
-        print(cols)
         for column in cols:
-            if all(value["value"] == "" for value in column["values"]):
+            if all(value["value"] == None for value in column["values"]):
                 empty_columns.append(column)
         for column in empty_columns:
             cols.remove(column)
@@ -152,8 +237,8 @@ async def fix_cols(userId, fileId):
         return {"error": str(e)}, 400
 
 
-@csv_route.route('/csv/<fileId>/fix/fixrows', methods=['POST'])
-async def fix_rows(userId, fileId):
+@csv_route.route('/csv/<fileId>/fixrows', methods=['GET'])
+async def fix_rows(fileId):
     try:
         empty_rows = []
         cols = csvs[fileId]["cols"]
@@ -162,7 +247,7 @@ async def fix_rows(userId, fileId):
             empty_rows.append([])
             i = 0
             for value in column["values"]:
-                if value["value"] == "":
+                if value["value"] == None:
                     empty_rows[-1].append(i)
                 i += 1
             if i > i_max:
@@ -180,57 +265,39 @@ async def fix_rows(userId, fileId):
         return {"error": str(e)}, 400
 
 
-
-@csv_route.route('/csv/<fileId>', methods=['PUT'])
-async def update_csv(userId, fileId):
-    try:
-        if 'file' not in request.files:
-            return {"error": "No file part"}, 400
-        else:
-            file = request.files['file']
-            if file.filename == '':
-                return {"error": "No selected file"}, 400
-            if file and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                path = os.path.join(STORAGE_CSV, userId, fileId)
-                file.save(os.path.join(path, filename))
-                handle_csv(fileId, os.path.join(path, filename), filename)
-                return {"message": "File updated"}, 200
-    except Exception as e:
-        return {"error": str(e)}, 400
-
-
-@csv_route.route('/csv/<fileId>/<columnName>/updateConst', methods=['POST'])
-async def update_const(userId, fileId, columnName):
+@csv_route.route('/csv/files/<fileId>/fixes/<columnName>/fixed/<fixedValue>', methods=['GET'])
+async def update_const(fileId, columnName, fixedValue):
     try:
         for column in csvs[fileId]["cols"]:
             if column["name"] == columnName:
+
                 if column['type'] == "number":
-                    const = request.json["value"]
+                    fixedValue = float(fixedValue)
+                    print(fixedValue)
                     for value in column["values"]:
-                        if value["value"] == "":
-                            value["value"] = const
+                        if value["value"] == None:
+                            value["value"] = fixedValue
 
                     return csvs[fileId]
 
     except Exception as e:
         return {"error, column not exist": str(e)}, 400
 
-    # `${address}/files/${title}/fixes/${col}/average`
 
 
-@csv_route.route('/csv//<fileId>/<columnName>/updateMedian', methods=['POST'])
-async def update_median(userId, fileId, columnName):
+@csv_route.route('/csv/files/<fileId>/fixes/<columnName>/median', methods=['GET'])
+async def update_median(fileId, columnName):
     try:
         for column in csvs[fileId]["cols"]:
             if column["name"] == columnName:
                 if column['type'] == "number":
-                    values = [float(value["value"]) for value in column["values"] if value["value"] != ""]
+                    values = [float(value["value"]) for value in column["values"] if value["value"] != None]
                     values.sort()
-                    median = values[len(values) // 2]
+                    median = values[len(values) // 2] if len(values) % 2 == 0 else (values[len(values) // 2] + values[len(values) // 2 + 1]) / 2
+                    print(median)
                     for value in column["values"]:
-                        if value["value"] == "":
-                            value["value"] = median
+                        if value["value"] == None:
+                            value["value"] = str(median)
 
                     return csvs[fileId]
 
@@ -238,38 +305,58 @@ async def update_median(userId, fileId, columnName):
         return {"error, column not exist": str(e)}, 400
 
 
-@csv_route.route('/csv/<userId>/<fileId>/data/<columnName>/updateMostCommon', methods=['POST'])
-async def update_most_common(userId, fileId, columnName):
+@csv_route.route('/csv/files/<fileId>/fixes/<columnName>/mostcommon', methods=['GET'])
+async def update_most_common(fileId, columnName):
     try:
         for column in csvs[fileId]["cols"]:
             if column["name"] == columnName:
-                values = [(value["value"]) for value in column["values"] if value["value"] != ""]
+                values = [(value["value"]) for value in column["values"] if value["value"] != None]
                 most_common = ""
                 for i in range(len(values)):
                     if values.count(values[i]) > values.count(most_common):
                         most_common = values[i]
                 for value in column["values"]:
-                    if value["value"] == "":
-                        value["value"] = most_common
+                    if value["value"] is None:
+                        value["value"] = str(most_common)
                 return csvs[fileId]
 
     except Exception as e:
         return {"error, column not exist": str(e)}, 400
 
 
-@csv_route.route('/csv/<fileId>/fixes/<columnName>/upadateAverage', methods=['POST'])
-async def update_avg(userId, fileId, columnName):
+@csv_route.route('/csv/files/<fileId>/fixes/<columnName>/average', methods=['GET'])
+async def update_avg(fileId, columnName):
     try:
         for column in csvs[fileId]["cols"]:
             if column["name"] == columnName:
                 if column['type'] == "number":
-                    values = [float(value["value"]) for value in column["values"] if value["value"] != ""]
-                    print(values)
+                    values = [float(value["value"]) for value in column["values"] if value["value"] != None]
                     avg = sum(values) / len(values)
                     avg = round(avg, 2)
                     for value in column["values"]:
-                        if value["value"] == "":
+                        print(value["value"], avg)
+                        if value["value"] is None:
                             value["value"] = str(avg)
+
+                    return csvs[fileId]
+                else:
+                    return {"error": "Column is not a number type"}, 400
+    except Exception as e:
+        return {"error, columnd not exist": str(e)}, 400
+
+@csv_route.route('/csv/files/<fileId>/fixes/<columnName>/normalize', methods=['GET'])
+async def update_normalize(fileId, columnName):
+    try:
+        for column in csvs[fileId]["cols"]:
+            if column["name"] == columnName:
+                if column['type'] == "number":
+                    values = [float(value["value"]) for value in column["values"] if value["value"] != None]
+                    print(values)
+                    max_value = max(values)
+                    min_value = min(values)
+                    for value in column["values"]:
+                        if value["value"] is not None:
+                            value["value"] = (float(value["value"]) - min_value) / (max_value - min_value) #normalizacja min-max
 
                     return csvs[fileId]
                 else:

@@ -7,8 +7,11 @@ import PerfectScrollbar from "react-perfect-scrollbar";
 const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
     const router = useRouter();
     const handleClick = async (type: "rows" | "cols") => {
-        const res = await fetch(`http://127.0.0.1:4000/csv/${file}/fix${type}`);
+        const res = await fetch(`http://127.0.0.1:4000/csv/${file}/fix${type}`,{
+            cache: "no-store",
+        });
         if (res.status == 200 || res.status == 201) {
+            console.log("dasjdoqwjdpqd");
             router.refresh();
         }
     };
@@ -42,7 +45,6 @@ const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
             <PerfectScrollbar className="w-full h-full">
                 <div className="flex flex-row ml-2">
                     {data.cols.map((col, index) => {
-                        console.log(col);
                         return (
                             <div
                                 key={index}
@@ -51,7 +53,11 @@ const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
                                 }}
                                 className=" flex flex-col text-white  w-auto rounded-e-lg cursor-pointer">
                                 <div className="flex flex-row justify-center items-center min-w-20 bg-slate-500 border ">
-                                    {col.name}
+                                    {col.name
+                                        .replace("_", " ")
+                                        .replace("(or)", "/")
+                                        .replace("_", " ")
+                                        .replace("/_", "/ ")}
                                 </div>
                                 <div className="border">
                                     {col.values.map((val, index2) => {

@@ -25,10 +25,16 @@ const Visual = ({
     col: string;
 }) => {
     const router = useRouter();
-
+    console.log(data);
     const compareContext = useCompareContext();
     const [fixedValue, setFixedValue] = useState("");
-    const [varName, setVarName] = useState(col);
+    const [varName, setVarName] = useState(
+        col
+            .replace("_", " ")
+            .replace("(or)", "/")
+            .replace("_", " ")
+            .replace("/_", "/ ")
+    );
     const [isCompareOpen, setIsCompareOpen] = useState(false);
     const [values, setValues] = useState(() => {
         return data.values.map((val) => {
@@ -50,18 +56,25 @@ const Visual = ({
 
     const generateButtons = (): React.ReactNode[] => {
         const arr: React.ReactNode[] = [];
-        const address = "127.0.0.1:4000/csv";
+        const address = "http://127.0.0.1:4000/csv";
         if (data.type == "number") {
             arr.push(
                 <div
                     key="fix"
-                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/4 cursor-pointer"
+                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400  cursor-pointer"
+                    style={{
+                        width: "calc(50% - 0.5rem)",
+                    }}
                     onClick={async () => {
                         const res = await fetch(
-                            `${address}/files/${title}/fixes/${col}/normalize`
+                            `${address}/files/${title}/fixes/${col}/normalize`,{
+                                cache: "no-store",
+                                method: "GET",
+                            }
                         );
                         if (res.status == 200 || res.status == 201)
-                            router.refresh();
+                            // router.refresh();
+                            window.location.reload();
                     }}>
                     Normalize
                 </div>
@@ -69,13 +82,19 @@ const Visual = ({
             arr.push(
                 <div
                     key="normalize"
-                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/4 cursor-pointer"
+                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400  cursor-pointer"
+                    style={{
+                        width: "calc(50% - 0.5rem)",
+                    }}
                     onClick={async () => {
                         const res = await fetch(
                             `${address}/files/${title}/fixes/${col}/average`
-                        );
+                        ,{
+                                cache: "no-store",
+                            });
                         if (res.status == 200 || res.status == 201)
-                            router.refresh();
+                            // router.refresh();
+                            window.location.reload();
                     }}>
                     Set average
                 </div>
@@ -83,13 +102,20 @@ const Visual = ({
             arr.push(
                 <div
                     key="normalize"
-                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/4 cursor-pointer"
+                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400  cursor-pointer"
+                    style={{
+                        width: "calc(50% - 0.5rem)",
+                    }}
                     onClick={async () => {
                         const res = await fetch(
                             `${address}/files/${title}/fixes/${col}/median`
-                        );
+                        ,{
+                                cache: "no-store",
+                                method: "GET",
+                            });
                         if (res.status == 200 || res.status == 201)
-                            router.refresh();
+                            // router.refresh();
+                            window.location.reload();
                     }}>
                     Set median
                 </div>
@@ -97,19 +123,26 @@ const Visual = ({
             arr.push(
                 <div
                     key="normalize"
-                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/4 cursor-pointer"
+                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 cursor-pointer"
+                    style={{
+                        width: "calc(50% - 0.5rem)",
+                    }}
                     onClick={async () => {
                         const res = await fetch(
                             `${address}/files/${title}/fixes/${col}/mostcommon`
-                        );
+                        ,{
+                                cache: "no-store",
+                                method: "GET",
+                            });
                         if (res.status == 200 || res.status == 201)
-                            router.refresh();
+                            // router.refresh();
+                            window.location.reload();
                     }}>
                     Set most common value
                 </div>
             );
             arr.push(
-                <div className="flex flex-row p-2 space-x-2  w-1/2">
+                <div className="flex flex-row p-2 space-x-2  w-full">
                     <input
                         className="bg-slate-500 rounded-md  text-white w-1/2"
                         type="text"
@@ -122,10 +155,14 @@ const Visual = ({
                         className="text-white p-2 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/2 cursor-pointer"
                         onClick={async () => {
                             const res = await fetch(
-                                `/files/${title}/fixes/${col}/fixed/${fixedValue}`
-                            );
+                                `${address}/files/${title}/fixes/${col}/fixed/${fixedValue}`
+                            ,{
+                                cache: "no-store",
+                                method: "GET",
+                            });
                             if (res.status == 200 || res.status == 201)
-                                router.refresh();
+                                // router.refresh();
+                                window.location.reload();
                         }}>
                         Fixed value
                     </div>
@@ -135,13 +172,19 @@ const Visual = ({
             arr.push(
                 <div
                     key="fix"
-                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/4 cursor-pointer"
+                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 cursor-pointer"
+                    style={{
+                        width: "calc(50% - 0.5rem)",
+                    }}
                     onClick={async () => {
                         const res = await fetch(
-                            `${address}/files/${title}/fixes/${col}/normalize`
+                            `${address}/files/${title}/fixes/${col}/normalize`,{
+                                cache: "no-store",
+                                method: "GET",
+                            }
                         );
                         if (res.status == 200 || res.status == 201)
-                            router.refresh();
+                            window.location.reload();
                     }}>
                     Normalize
                 </div>
@@ -149,19 +192,26 @@ const Visual = ({
             arr.push(
                 <div
                     key="normalize"
-                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/4 cursor-pointer"
+                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/2 cursor-pointer"
+                    style={{
+                        width: "calc(50% - 0.5rem)",
+                    }}
                     onClick={async () => {
                         const res = await fetch(
-                            `${address}/files/${title}/fixes/${col}/mostcommon`
+                            `${address}/files/${title}/fixes/${col}/mostcommon`,{
+                                cache: "no-store",
+                                method: "GET",
+                            }
                         );
                         if (res.status == 200 || res.status == 201)
-                            router.refresh();
+                            // router.refresh();
+                            window.location.reload();
                     }}>
                     Set most common value
                 </div>
             );
             arr.push(
-                <div className="flex flex-row p-2 space-x-2  w-1/2">
+                <div className="flex flex-row p-2 space-x-2  w-full">
                     <input
                         className="bg-slate-500 rounded-md  text-white w-1/2"
                         type="text"
@@ -174,10 +224,14 @@ const Visual = ({
                         className="text-white p-2 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/2 cursor-pointer"
                         onClick={async () => {
                             const res = await fetch(
-                                `/files/${title}/fixes/${col}/fixed/${fixedValue}`
+                                `${address}/files/${title}/fixes/${col}/fixed/${fixedValue}`,{
+                                cache: "no-store",
+                                method: "GET",
+                            }
                             );
                             if (res.status == 200 || res.status == 201)
-                                router.refresh();
+                                // router.refresh();
+                                window.location.reload();
                         }}>
                         Fixed value
                     </div>
@@ -187,11 +241,12 @@ const Visual = ({
         arr.push(
             <div
                 key="update"
-                className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/4 cursor-pointer"
+                className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 w-full cursor-pointer"
                 onClick={async () => {
                     const res = await fetch(
                         `${address}/files/${title}/fixes/${col}`,
                         {
+                            cache: "no-store",
                             method: "PUT",
                             body: JSON.stringify({
                                 name: varName,
