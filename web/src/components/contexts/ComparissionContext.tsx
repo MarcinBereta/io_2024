@@ -8,10 +8,12 @@ const ComparisonContext = createContext<{
     };
     addCompare: (fileId: string, compare: string) => void;
     removeCompare: (fileId: string, compare: string) => void;
+    cleanCompare: () => void;
 }>({
     compares: {},
     addCompare: (fileId: string, compare: string) => {},
     removeCompare: (fileId: string, compare: string) => {},
+    cleanCompare: () => {},
 });
 
 const ComparisonWrapper = ({ children }: { children: React.ReactNode }) => {
@@ -50,12 +52,18 @@ const ComparisonWrapper = ({ children }: { children: React.ReactNode }) => {
         await localStorage.setItem("compares", JSON.stringify(newCompare));
     };
 
+    const cleanCompare = async () => {
+        setCompares({});
+        await localStorage.setItem("compares", JSON.stringify({}));
+    };
+
     return (
         <ComparisonContext.Provider
             value={{
                 compares,
                 addCompare,
                 removeCompare,
+                cleanCompare,
             }}>
             {children}
         </ComparisonContext.Provider>

@@ -81,7 +81,7 @@ const groupByData = (data: CSVColumnDetailed, data2: CSVColumnDetailed) => {
     return parsedData;
 };
 
-const Page = ({
+const Page = async ({
     params: { fieldId, columnId },
     searchParams: { col1, col2 },
 }: {
@@ -94,8 +94,27 @@ const Page = ({
         col2: string;
     };
 }) => {
-    const data = generateMockData();
-    const data2 = generateMockData();
+    const res = await fetch(
+        `http://127.0.0.1:4000/csv/${fieldId}/data/${col1}`,
+        {
+            cache: "no-store",
+            method: "GET",
+        }
+    );
+    const data = await res.json();
+
+    const res2 = await fetch(
+        `http://127.0.0.1:4000/csv/${fieldId}/data/${col2}`,
+        {
+            cache: "no-store",
+            method: "GET",
+        }
+    );
+    const data2 = await res2.json();
+
+    // const data = generateMockData();
+
+    // const data2 = generateMockData();
 
     const groupedData = groupByData(data, data2);
     return (

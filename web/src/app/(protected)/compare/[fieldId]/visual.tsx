@@ -171,17 +171,18 @@ const Visual = ({
                     </div>
                 </div>
             </div>
-
-            <BarChart
-                className="h-80 w-full"
-                data={groupedData}
-                index="name"
-                categories={["count1", "count2"]}
-                colors={["blue", "teal"]}
-                valueFormatter={dataFormatter}
-                yAxisWidth={48}
-                onValueChange={(v) => console.log(v)}
-            />
+            {groupedData.length == 0 ? null : (
+                <BarChart
+                    className="h-80 w-full"
+                    data={groupedData}
+                    index="name"
+                    categories={["count1", "count2"]}
+                    colors={["blue", "teal"]}
+                    valueFormatter={dataFormatter}
+                    yAxisWidth={48}
+                    onValueChange={(v) => console.log(v)}
+                />
+            )}
         </div>
     );
 };
