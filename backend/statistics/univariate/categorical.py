@@ -27,6 +27,7 @@ def count_graph(column):
     plt.yticks(yint)
     plt.title("Number of categories")
     plt.tight_layout()
+    plt.savefig('../../graphs/cat_count.png')
     plt.show()
 
 
@@ -38,5 +39,6 @@ def count_perc_graph(column):
     plt.legend(loc='best')
     plt.axis('equal')
     plt.tight_layout()
+    plt.savefig('../../graphs/cat_count_perc.png')
     plt.show()
 

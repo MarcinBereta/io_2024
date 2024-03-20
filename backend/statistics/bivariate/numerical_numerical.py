@@ -12,5 +12,6 @@ def correlation_graph(column1, column2):
     plt.xlabel('column1')
     plt.ylabel('column2')
     plt.grid()
+    plt.savefig('../../graphs/numnum_correlation.png')
     plt.show()
 

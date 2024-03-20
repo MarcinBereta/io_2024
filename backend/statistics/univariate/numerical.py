@@ -1,5 +1,6 @@
 import statistics as st
 
+import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import skew, kurtosis
 
@@ -52,15 +53,35 @@ def get_kurtosis(column):
     return kurtosis(column)
 
 
-def box_plot_graph(column):
+# TODO
+# Globla variable path
+def box_plot_graph(column, label):
     plt.boxplot(column)
+
+    plt.grid(axis='y', alpha=0.75)
+    plt.xlabel(label[0])
+    plt.ylabel('Values')
+    plt.title(f'Boxplot of {label[0]}')
+
+    plt.tight_layout()
+    plt.savefig('../../graphs/num_boxplot.png')
     plt.show()
 
 
-def histogram_graph(column):
-    plt.hist(column)
+def histogram_graph(column, label):
+    n, bins, patches = plt.hist(column, bins='auto', color='#0504aa',
+                                alpha=0.7, rwidth=0.85)
+    plt.grid(axis='y', alpha=0.75)
+    plt.xlabel(label[0])
+    plt.ylabel('Frequency')
+    plt.title(f'Histogram of {label[0]}')
+
+    maxfreq = n.max()
+    plt.ylim(ymax=np.ceil(maxfreq / 10) * 10 if maxfreq % 10 else maxfreq + 10)
+    plt.tight_layout()
+    plt.savefig('../../graphs/num_histogram.png')
     plt.show()
 
 
-# arr = [1, 1, 1, 20, 30, 31, 31, 22, 22, 12, 30, 49]
-# histogram_graph(arr)
+arr = [1, 1, 1, 20, 30, 31, 31, 22, 22, 12, 30, 49]
+box_plot_graph(arr, 'x')
