@@ -1,13 +1,14 @@
 def convert_to_arr(csv):
     columns = len(csv['cols'])
     arr = [[] for _ in range(columns)]
+    labels = [None for _ in range(columns)]
     i = 0
     for column in csv['cols']:
-        column_name = column['name']
+        labels[i] = (column['name'], column['type'])
         for value in column['values']:
             arr[i].append(value['value'])
         i += 1
-    return arr, column_name
+    return arr, labels
 
 
 example = {'cols': [{'name': 'X', 'type': 'number', 'values': [{'value': 1, 'type': 'normal'}, {'value': 2, 'type': 'normal'}, {'value': 3, 'type': 'normal'}, {'value': None, 'type': 'row_null'}, {'value': 5, 'type': 'normal'}, {'value': 3, 'type': 'normal'}, {'value': 7, 'type': 'normal'}, {'value': 8, 'type': 'normal'}], 'details': [], 'graphs': []},
