@@ -56,6 +56,7 @@ def is_date(string):
     except ValueError:
         return False
 
+
 def row_null_type_set(fileId):
     cols = csvs[fileId]["cols"]
     empty_rows = [set() for _ in range(len(cols))]
@@ -72,6 +73,8 @@ def row_null_type_set(fileId):
                 column["values"][i]["type"] = "row_null"
 
     return csvs[fileId]
+
+
 def delete_row_null_type(fileId):
     cols = csvs[fileId]["cols"]
     for column in cols:
@@ -79,7 +82,6 @@ def delete_row_null_type(fileId):
             if value["type"] == "row_null":
                 value["type"] = "null"
     return csvs[fileId]
-
 
 
 def parse_value(v):
@@ -104,6 +106,7 @@ def set_column_type(column):
 
 
 def handle_csv(fileId, path, filename):
+    print(path)
     with open(path, 'r', encoding="utf8") as csv_file:
         reader = csv.reader(csv_file)
         data = {}
@@ -134,13 +137,11 @@ def handle_csv(fileId, path, filename):
             "id:": fileId
         }
         row_null_type_set(fileId)
-        # print(csvs)
         # csvs[fileId] = data
 
 
 @csv_route.route('/csv', methods=['POST'])
 async def upload_csv():
-    print(request.headers)
     if 'file' not in request.files or 'userId' not in request.form:
         return {"error": "No file part or no user id provided"}, 400
     else:
@@ -159,7 +160,6 @@ async def upload_csv():
             shutil.copy(os.path.join(path, filename), os.path.join(path, filename.strip('.csv') + "_original" + ".csv"))
             try:
                 await db.connect()
-
                 csv_file = await db.csvfile.create(
                     data={
                         "id": unique_fileid,
@@ -212,7 +212,9 @@ async def get_csv(fileId):  # one csv
 @csv_route.route('/csv/<fileId>/data/<colId>', methods=['GET'])
 async def get_csv_col(fileId, colId):  # one csv
     try:
+        print(fileId, colId)
         csvFile = csvs[fileId]
+        print(csvFile["cols"])
     except Exception as e:
         await db.connect()
         try:
@@ -313,7 +315,6 @@ async def update_const(fileId, columnName, fixedValue):
         return {"error, column not exist": str(e)}, 400
 
 
-
 @csv_route.route('/csv/files/<fileId>/fixes/<columnName>/median', methods=['GET'])
 async def update_median(fileId, columnName):
     try:
@@ -322,7 +323,8 @@ async def update_median(fileId, columnName):
                 if column['type'] == "number":
                     values = [float(value["value"]) for value in column["values"] if value["value"] != None]
                     values.sort()
-                    median = values[len(values) // 2] if len(values) % 2 == 0 else (values[len(values) // 2] + values[len(values) // 2 + 1]) / 2
+                    median = values[len(values) // 2] if len(values) % 2 == 0 else (values[len(values) // 2] + values[
+                        len(values) // 2 + 1]) / 2
                     print(median)
                     for value in column["values"]:
                         if value["value"] == None:
@@ -378,6 +380,7 @@ async def update_avg(fileId, columnName):
     except Exception as e:
         return {"error, columnd not exist": str(e)}, 400
 
+
 @csv_route.route('/csv/files/<fileId>/fixes/<columnName>/normalize', methods=['GET'])
 async def update_normalize(fileId, columnName):
     try:
@@ -390,10 +393,68 @@ async def update_normalize(fileId, columnName):
                     min_value = min(values)
                     for value in column["values"]:
                         if value["value"] is not None:
-                            value["value"] = (float(value["value"]) - min_value) / (max_value - min_value) #normalizacja min-max
+                            value["value"] = (float(value["value"]) - min_value) / (
+                                        max_value - min_value)  # normalizacja min-max
 
                     return csvs[fileId]
                 else:
                     return {"error": "Column is not a number type"}, 400
     except Exception as e:
         return {"error, columnd not exist": str(e)}, 400
+
+
+@csv_route.route('/csv/files/<fileId>/fixes/<columnName>', methods=['PUT'])
+async def update_column(fileId, columnName):
+    data = request.get_json()
+    data['values'] = [parse_value(value)[0] for value in data['values']]
+    try:
+        for column in csvs[fileId]["cols"]:
+            if column["name"] == columnName:
+                for i, value in enumerate(data['values']):
+                    column["values"][i]["value"] = parse_value(value)[0]
+                    column["values"][i]["type"] = parse_value(value)[1]
+                type_c, val = column["values"][0]["type"], column["values"][0]["value"]
+                if type_c == "normal":
+                    if is_float(val):
+                        column["type"] = "number"
+                    else:
+                        column["type"] = "text"
+                # na razie bez zmiany  nazwy kolumny
+                return csvs[fileId]
+        return {"error": "Column not found"}, 400
+    except Exception as e:
+        return {"error": str(e)}, 400
+
+
+async def update_file(fileId):
+    try:
+        await db.connect()
+        csv_file = await db.csvfile.find_unique(
+            where={"id": fileId}
+        )
+        directory, filename = os.path.split(csv_file.path)
+        with open(csv_file.path, 'w', newline='', encoding='utf8') as file:
+            writer = csv.writer(file, delimiter=';')
+            writer.writerow([col['name'] for col in csvs[fileId]['cols']])
+            for i in range(len(csvs[fileId]['cols'][0]['values'])):
+                writer.writerow([csvs[fileId]['cols'][j]['values'][i]['value'] for j in range(len(csvs[fileId]['cols']))])
+    finally:
+        if db.is_connected:
+            await db.disconnect()
+
+
+@csv_route.route('/csv/<fileId>/download', methods=['GET'])
+async def download_csv(fileId):
+    await update_file(fileId)
+
+    try:
+        await db.connect()
+
+        csv_file = await db.csvfile.find_unique(
+            where={"id": fileId}
+        )
+        directory, filename = os.path.split(csv_file.path)
+        return send_from_directory(directory, filename, as_attachment=True)
+    finally:
+        if db.is_connected:
+            await db.disconnect()

@@ -23,7 +23,7 @@ const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
     const handleDownload = async () => {
         const res = await fetch(`http://127.0.0.1:4000/csv/${file}/download`, {
             cache: "no-store",
-            method: "POST",
+            method: "GET",
         });
         if (res.status == 200 || res.status == 201) {
             router.replace(res.url);
