@@ -1,7 +1,8 @@
 import statistics as st
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.stats import skew, kurtosis
+import scipy.stats
+from scipy.stats import skew, kurtosis, shapiro
 
 
 def get_min(column):
@@ -54,6 +55,15 @@ def get_skew(column):
 
 def get_kurtosis(column):
     return kurtosis(column)
+
+
+def get_is_normal_distr(column):
+    stat, p_val = shapiro(column)
+    alpha = 0.05
+    if p_val > alpha:
+        return True
+    else:
+        return False
 
 
 # TODO
