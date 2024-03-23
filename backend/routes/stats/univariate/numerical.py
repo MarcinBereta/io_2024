@@ -1,5 +1,4 @@
 import statistics as st
-
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import skew, kurtosis
@@ -29,8 +28,12 @@ def get_range(column):
     return max(column) - min(column)
 
 
-def get_quantiles(column):
-    pass
+def get_quantile1(column):
+    return np.percentile(column, 25)
+
+
+def get_quantile3(column):
+    return np.percentile(column, 75)
 
 
 def get_variance(column):
@@ -83,5 +86,5 @@ def histogram_graph(column, label):
     plt.show()
 
 
-arr = [1, 1, 1, 20, 30, 31, 31, 22, 22, 12, 30, 49]
-box_plot_graph(arr, 'x')
+# arr = [1, 1, 1, 20, 30, 31, 31, 22, 22, 12, 30, 49]
+# box_plot_graph(arr, 'x')

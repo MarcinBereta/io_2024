@@ -1,14 +1,13 @@
 from datetime import datetime
 
-from flask import Blueprint, request, redirect, flash, url_for, send_from_directory
-from prisma.models import CSVFile
+from flask import Blueprint, request, redirect, flash
 from prisma import Prisma, register
 from werkzeug.utils import secure_filename
 import os
 import uuid
 import csv
 import shutil
-from copy import deepcopy
+from stats import data_builder
 
 csv_route = Blueprint('csv', __name__)
 STORAGE_CSV = '.\static'
@@ -213,6 +212,7 @@ async def get_csv(fileId):  # one csv
 async def get_csv_col(fileId, colId):  # one csv
     try:
         csvFile = csvs[fileId]
+        print("hm?")
     except Exception as e:
         await db.connect()
         try:
@@ -227,6 +227,8 @@ async def get_csv_col(fileId, colId):  # one csv
             await db.disconnect()
     for col in csvFile["cols"]:
         if col["name"] == colId:
+            col["details"] = data_builder.get_num_data(col["values"])
+            print(col["details"])
             delete_row_null_type(fileId)
             return col
 
