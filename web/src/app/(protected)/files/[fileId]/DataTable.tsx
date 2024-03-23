@@ -31,6 +31,7 @@ const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
     };
 
     const handleDownloadSelectedCols = async () => {
+        console.log(selectedColumns);
         const res = await fetch(
             `http://127.0.0.1:4000/csv/${file}/downloadSelected`,
             {
@@ -41,9 +42,25 @@ const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
                 }),
             }
         );
+
         if (res.status == 200 || res.status == 201) {
-            router.replace(res.url);
+            const data = await res.json();
+            console.log(data);
+            // router.replace(res.url);
+            const newFile = await fetch(
+                `http://127.0.0.1:4000/csv/${file}/downloadSelected/${data.file}`,
+                {
+                    method: "GET",
+                    cache: "no-store",
+                }
+            );
+            if (newFile.status == 200 || newFile.status == 201) {
+                router.replace(newFile.url);
+            }
         }
+        // if (res.status == 200 || res.status == 201) {
+        //     router.replace(res.url);
+        // }
     };
 
     return (

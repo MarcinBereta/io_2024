@@ -9,6 +9,7 @@ import uuid
 import csv
 import shutil
 from copy import deepcopy
+import json
 
 csv_route = Blueprint('csv', __name__)
 STORAGE_CSV = '.\static'
@@ -394,7 +395,7 @@ async def update_normalize(fileId, columnName):
                     for value in column["values"]:
                         if value["value"] is not None:
                             value["value"] = (float(value["value"]) - min_value) / (
-                                        max_value - min_value)  # normalizacja min-max
+                                    max_value - min_value)  # normalizacja min-max
 
                     return csvs[fileId]
                 else:
@@ -432,12 +433,18 @@ async def update_file(fileId):
         csv_file = await db.csvfile.find_unique(
             where={"id": fileId}
         )
+        try:
+            csvs[fileId]
+        except Exception as e:
+            handle_csv(fileId, csv_file.path, csv_file.name)
+
         directory, filename = os.path.split(csv_file.path)
         with open(csv_file.path, 'w', newline='', encoding='utf8') as file:
             writer = csv.writer(file, delimiter=';')
             writer.writerow([col['name'] for col in csvs[fileId]['cols']])
             for i in range(len(csvs[fileId]['cols'][0]['values'])):
-                writer.writerow([csvs[fileId]['cols'][j]['values'][i]['value'] for j in range(len(csvs[fileId]['cols']))])
+                writer.writerow(
+                    [csvs[fileId]['cols'][j]['values'][i]['value'] for j in range(len(csvs[fileId]['cols']))])
     finally:
         if db.is_connected:
             await db.disconnect()
@@ -446,7 +453,6 @@ async def update_file(fileId):
 @csv_route.route('/csv/<fileId>/download', methods=['GET'])
 async def download_csv(fileId):
     await update_file(fileId)
-
     try:
         await db.connect()
 
@@ -455,6 +461,56 @@ async def download_csv(fileId):
         )
         directory, filename = os.path.split(csv_file.path)
         return send_from_directory(directory, filename, as_attachment=True)
+    finally:
+        if db.is_connected:
+            await db.disconnect()
+
+
+async def create_sub_file(fileId, columns):
+    newFileId = str(uuid.uuid4()) + ".csv"
+
+    try:
+        await db.connect()
+        csv_file = await db.csvfile.find_unique(
+            where={"id": fileId}
+        )
+        directory, filename = os.path.split(csv_file.path)
+        try:
+            csvs[fileId]
+        except Exception as e:
+            handle_csv(fileId, csv_file.path, csv_file.name)
+
+        with open(os.path.join(directory, newFileId), 'w', newline='', encoding='utf8') as file:
+            writer = csv.writer(file, delimiter=';')
+            writer.writerow([col['name'] for col in csvs[fileId]['cols'] if col['name'] in columns])
+            for i in range(len(csvs[fileId]['cols'][0]['values'])):
+                valuesToWrite = []
+                for j in range(len(csvs[fileId]['cols'])):
+                    if csvs[fileId]['cols'][j]['name'] in columns:
+                        valuesToWrite.append(csvs[fileId]['cols'][j]['values'][i]['value'])
+                writer.writerow(valuesToWrite)
+    finally:
+        if db.is_connected:
+            await db.disconnect()
+        return newFileId
+
+
+@csv_route.route('/csv/<fileId>/downloadSelected', methods=['POST'])
+async def download_csv_with_selected(fileId):
+    decoded_str = request.data.decode('utf-8')
+    obj = json.loads(decoded_str)
+    newFileId = await create_sub_file(fileId, obj['selectedColumns'])
+    return {"file": newFileId}
+@csv_route.route('/csv/<fileId>/downloadSelected/<newFileId>', methods=['GET'])
+async def download_csv_with_selected_values(fileId, newFileId):
+    try:
+        await db.connect()
+
+        csv_file = await db.csvfile.find_unique(
+            where={"id": fileId}
+        )
+        directory, filename = os.path.split(csv_file.path)
+        return send_from_directory(directory, newFileId, as_attachment=True)
     finally:
         if db.is_connected:
             await db.disconnect()
