@@ -265,8 +265,12 @@ const Visual = ({
                             }),
                         }
                     );
-                    if (res.status == 200 || res.status == 201)
-                        router.refresh();
+                    if (res.status == 200 || res.status == 201){
+                        router.push(`/files/${title}/${varName}`);
+                        router.refresh();}
+                    else if (res.status == 409){
+                        alert("Column name already exists");
+                    }
                 }}>
                 Update
             </div>
@@ -309,6 +313,13 @@ const Visual = ({
                                 setIsCompareOpen(false);
                             }}>
                             Clean compare
+                        </button>
+                        <button
+                            className="text-white p-3 rounded hover:border-gray-600 text-xl bg-slate-400 ml-4"
+                            onClick={() => {
+                                router.push(`/files/${title}`);
+                            }}>
+                            Back
                         </button>
                     </div>
                 </div>
