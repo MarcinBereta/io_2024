@@ -31,7 +31,10 @@ const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
     };
 
     const handleDownloadSelectedCols = async () => {
-        console.log(selectedColumns);
+        if (selectedColumns.length == 0) {
+            alert("Please select atleast one column to download");
+            return;
+        }
         const res = await fetch(
             `http://127.0.0.1:4000/csv/${file}/downloadSelected`,
             {
