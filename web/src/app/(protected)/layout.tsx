@@ -9,8 +9,8 @@ const ProtectedLayout = ({ children }: ProtectedLayoutProps) => {
     return (
         <ComparisonWrapper>
             <div
-                style={{ backgroundColor: "#121217" }}
-                className=" w-full flex flex-col gap-y-5">
+                className=" w-full flex flex-col gap-y-5 bg-bg overflow-auto relative"
+                style={{ minHeight: "100%", backgroundColor: "#121217" }}>
                 <div className="w-full flex "> {children}</div>
             </div>
         </ComparisonWrapper>

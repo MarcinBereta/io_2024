@@ -117,8 +117,7 @@ const Page = async ({
         }
     );
     const data = await res.json();
-    console.log(data);
-    // const data = generateMockData();
+
     const groupedData = groupByData(data);
     return (
         <div className="w-full h-full">

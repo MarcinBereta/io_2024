@@ -25,7 +25,6 @@ const Visual = ({
     col: string;
 }) => {
     const router = useRouter();
-    console.log(data);
     const compareContext = useCompareContext();
     const [fixedValue, setFixedValue] = useState("");
     const [varName, setVarName] = useState(
@@ -256,19 +255,19 @@ const Visual = ({
                         {
                             cache: "no-store",
                             method: "PUT",
-                                headers: {
-                                        'Content-Type': 'application/json'
-                                    },
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
                             body: JSON.stringify({
                                 name: varName,
                                 values: values,
                             }),
                         }
                     );
-                    if (res.status == 200 || res.status == 201){
+                    if (res.status == 200 || res.status == 201) {
                         router.push(`/files/${title}/${varName}`);
-                        router.refresh();}
-                    else if (res.status == 409){
+                        router.refresh();
+                    } else if (res.status == 409) {
                         alert("Column name already exists");
                     }
                 }}>
@@ -281,7 +280,7 @@ const Visual = ({
 
     return (
         <div
-            className="flex flex-col w-full h-full"
+            className="flex flex-col w-full h-full relative"
             style={{ maxHeight: "calc(70vh - 2.5rem)" }}>
             <div className="flex flex-row">
                 <div className="flex flex-col text-white">
@@ -397,7 +396,7 @@ const Visual = ({
                     />
                 </div>
             </div>
-            <div className="absolute bottom-2 right-2">
+            <div className="absolute bottom-2 right-2 bg-slate-700 p-4 rounded-xl">
                 <div
                     className="text-white cursor-pointer"
                     onClick={() => {

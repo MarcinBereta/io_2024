@@ -112,9 +112,15 @@ const Page = async ({
     );
     const data2 = await res2.json();
 
+    const res3 = await fetch(
+        `http://127.0.0.1:4000/csv/${fieldId}/data/${col1}/${col2}`
+    );
+
     // const data = generateMockData();
 
     // const data2 = generateMockData();
+
+    const data3 = await res3.json();
 
     const groupedData = groupByData(data, data2);
     return (
@@ -126,6 +132,7 @@ const Page = async ({
                     groupedData={groupedData}
                     title={fieldId}
                     cols={[col1, col2]}
+                    graphs={data3}
                 />
             </div>
         </div>
