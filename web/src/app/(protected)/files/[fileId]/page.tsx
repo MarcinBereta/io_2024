@@ -76,8 +76,7 @@ const Page = async ({
         cache: "no-store",
     });
     const data = (await res.json()) as CSVFile;
-    // console.log(data)
-    console.log(new Date());
+
     return (
         <div className="w-full h-full">
             <div className="w-full h-full flex justify-center items-center">

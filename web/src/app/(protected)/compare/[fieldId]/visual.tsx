@@ -55,6 +55,7 @@ const Visual = ({
     data2,
     title,
     cols,
+    graphs,
 }: {
     data: CSVColumnDetailed;
     groupedData: {
@@ -66,12 +67,11 @@ const Visual = ({
 
     title: string;
     cols: string[];
+    graphs: string[];
 }) => {
-    console.log(groupedData);
-
     return (
         <div
-            className="flex flex-col w-full h-full"
+            className="flex flex-col w-full h-full "
             style={{ maxHeight: "calc(80vh - 2.5rem)" }}>
             <div className="flex flex-row justify-center text-white">
                 <div className=" text-2xl">{title}</div>
@@ -87,7 +87,7 @@ const Visual = ({
                     );
                 })}
             </div>
-            <div className="flex flex-row w-full justify-around">
+            <div className="flex flex-row w-full justify-around bg-black">
                 <div
                     className=" w-1/4 h-full"
                     style={{ maxHeight: "calc(40vh - 2.5rem)" }}>
@@ -115,7 +115,7 @@ const Visual = ({
                     </PerfectScrollbar>
                 </div>
                 <div
-                    className=" w-1/4 h-full"
+                    className=" w-1/4 h-full "
                     style={{ maxHeight: "calc(40vh - 2.5rem)" }}>
                     <PerfectScrollbar>
                         {data2.values.map((val, index2) => {
