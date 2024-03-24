@@ -1,8 +1,8 @@
 import statistics as st
 import numpy as np
 import matplotlib.pyplot as plt
-import scipy.stats
 from scipy.stats import skew, kurtosis, shapiro
+import os
 
 
 def get_min(column):
@@ -66,21 +66,6 @@ def get_is_normal_distr(column):
         return False
 
 
-# TODO
-# Globla variable path
-def box_plot_graph(column, label):
-    plt.boxplot(column)
-
-    plt.grid(axis='y', alpha=0.75)
-    plt.xlabel(label[0])
-    plt.ylabel('Values')
-    plt.title(f'Boxplot of {label[0]}')
-
-    plt.tight_layout()
-    plt.savefig('../../graphs/num_boxplot.png')
-    plt.show()
-
-
 def histogram_graph(column, label):
     n, bins, patches = plt.hist(column, bins='auto', color='#0504aa',
                                 alpha=0.7, rwidth=0.85)
@@ -92,9 +77,14 @@ def histogram_graph(column, label):
     maxfreq = n.max()
     plt.ylim(ymax=np.ceil(maxfreq / 10) * 10 if maxfreq % 10 else maxfreq + 10)
     plt.tight_layout()
-    plt.savefig('../../graphs/num_histogram.png')
-    plt.show()
 
+    file_name = f'{label}_num_hist.png'
+    path = os.path.join(os.path.dirname(__file__), f'../../../graphs', file_name)
+    plt.savefig(path)
+    plt.clf()
+    return f'/graphs/{file_name}'
 
+#
 # arr = [1, 1, 1, 20, 30, 31, 31, 22, 22, 12, 30, 49]
-# box_plot_graph(arr, 'x')
+# print(get_is_normal_distr(arr))
+# histogram_graph(arr, 'x')

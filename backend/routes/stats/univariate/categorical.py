@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import math
+import os
 
 
 def count(column):
@@ -15,7 +16,7 @@ def count(column):
     return cat, amount
 
 
-def count_graph(column):
+def count_graph(column, label):
     cat, quantity = count(column)
 
     yint = range(min(quantity), math.ceil(max(quantity)) + 1)
@@ -25,20 +26,27 @@ def count_graph(column):
     plt.xticks(rotation=30)
     plt.ylabel("Count")
     plt.yticks(yint)
-    plt.title("Number of categories")
+    plt.title(f"Number of {label}")
     plt.tight_layout()
-    plt.savefig('../../graphs/cat_count.png')
-    plt.show()
+
+    file_name = f'{label}_cat_count.png'
+    path = os.path.join(os.path.dirname(__file__), f'../../../graphs', file_name)
+    plt.savefig(path)
+    plt.clf()
+    return f'/graphs/{file_name}'
 
 
-def count_perc_graph(column):
+def count_perc_graph(column, label):
     cat, quantity = count(column)
 
-    plt.pie(quantity, labels=cat, autopct='%1.1f%%')
-    plt.title("Percentages of categories")
-    plt.legend(loc='best')
+    plt.pie(quantity, autopct='%1.1f%%')
+    plt.title(f"Percentage of {label}")
+    plt.legend(cat, loc='best')
     plt.axis('equal')
     plt.tight_layout()
-    plt.savefig('../../graphs/cat_count_perc.png')
-    plt.show()
 
+    file_name = f'{label}_cat_count_perc.png'
+    path = os.path.join(os.path.dirname(__file__), f'../../../graphs', file_name)
+    plt.savefig(path)
+    plt.clf()
+    return f'/graphs/{file_name}'

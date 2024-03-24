@@ -212,7 +212,6 @@ async def get_csv(fileId):  # one csv
 async def get_csv_col(fileId, colId):  # one csv
     try:
         csvFile = csvs[fileId]
-        print("hm?")
     except Exception as e:
         await db.connect()
         try:
@@ -227,9 +226,9 @@ async def get_csv_col(fileId, colId):  # one csv
             await db.disconnect()
     for col in csvFile["cols"]:
         if col["name"] == colId:
-            col["details"] = data_builder.get_num_data(col["values"])
-            print(col["details"])
             delete_row_null_type(fileId)
+            col["details"], col["graphs"] = data_builder.get_data(col["values"], col["type"], col["name"])
+            print(col["graphs"])
             return col
 
 
@@ -380,6 +379,7 @@ async def update_avg(fileId, columnName):
     except Exception as e:
         return {"error, columnd not exist": str(e)}, 400
 
+
 @csv_route.route('/csv/files/<fileId>/fixes/<columnName>/normalize', methods=['GET'])
 async def update_normalize(fileId, columnName):
     try:
@@ -399,3 +399,15 @@ async def update_normalize(fileId, columnName):
                     return {"error": "Column is not a number type"}, 400
     except Exception as e:
         return {"error, columnd not exist": str(e)}, 400
+
+
+@csv_route.route('/csv/files/<fileId>/graphs/<columnName>')
+async def get_graphs(fileId, columnName):
+    try:
+        for column in csvs[fileId]["cols"]:
+            if column["name"] == columnName:
+                return column["graphs"]
+    except Exception as e:
+        return {"error, column not exist": str(e)}, 400
+
+

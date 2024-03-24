@@ -1,12 +1,29 @@
-from univariate import numerical
+from univariate import numerical, categorical
 
 
-# skipping null values
-def get_num_data(csv):
+def get_data(col_csv, col_type, col_name):
+    data = []
+    graphs = []
+    arr_data = csv_to_arr(col_csv)
+    if col_type == 'number':
+        data = get_num_data(col_csv)
+        graphs.append(numerical.histogram_graph(arr_data, col_name))
+    elif col_type == 'text':
+        graphs.append(categorical.count_graph(arr_data, col_name))
+        graphs.append(categorical.count_perc_graph(arr_data, col_name))
+    return data, graphs
+
+
+def csv_to_arr(col_csv):
     column = []
-    for pair_val in csv:
+    for pair_val in col_csv:
         if pair_val['value'] is not None:
             column.append(pair_val['value'])
+    return column
+
+
+def get_num_data(col_csv):
+    column = csv_to_arr(col_csv)
 
     result = [
         {
@@ -68,10 +85,6 @@ def get_num_data(csv):
     ]
     result = round_num_result(result)
     return result
-
-
-def get_cat_data(csv):
-    pass
 
 
 def round_num_result(arr):
