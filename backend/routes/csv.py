@@ -1,7 +1,6 @@
 from datetime import datetime
 
-from flask import Blueprint, request, redirect, flash, url_for, send_from_directory
-from prisma.models import CSVFile
+from flask import Blueprint, request, redirect, flash
 from prisma import Prisma, register
 from werkzeug.utils import secure_filename
 import os
@@ -10,6 +9,7 @@ import csv
 import shutil
 from copy import deepcopy
 import json
+from stats import data_builder
 
 csv_route = Blueprint('csv', __name__)
 STORAGE_CSV = '.\static'
@@ -226,6 +226,8 @@ async def get_csv_col(fileId, colId):  # one csv
     for col in csvFile["cols"]:
         if col["name"] == colId:
             delete_row_null_type(fileId)
+            col["details"], col["graphs"] = data_builder.get_data(col["values"], col["type"], col["name"])
+            print(col["graphs"])
             return col
 
 
@@ -510,3 +512,11 @@ async def download_csv_with_selected_values(fileId, newFileId):
     finally:
         if db.is_connected:
             await db.disconnect()
+@csv_route.route('/csv/files/<fileId>/graphs/<columnName>')
+async def get_graphs(fileId, columnName):
+    try:
+        for column in csvs[fileId]["cols"]:
+            if column["name"] == columnName:
+                return column["graphs"]
+    except Exception as e:
+        return {"error, column not exist": str(e)}, 400
