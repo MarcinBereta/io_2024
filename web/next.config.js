@@ -22,7 +22,8 @@ module.exports = (phase) => {
                     "emojipedia-us.s3.dualstack.us-west-1.amazonaws.com",
                     "upload.wikimedia.org",
                     "localhost",
-                    "lb.homewrk.org",
+                    "127.0.0.1",
+                    "127.0.0.1:4000",
                 ],
             },
             serverRuntimeConfig: {
@@ -43,7 +44,7 @@ module.exports = (phase) => {
                 "emojipedia-us.s3.dualstack.us-west-1.amazonaws.com",
                 "upload.wikimedia.org",
                 "localhost",
-                "lb.homewrk.org",
+                "127.0.0.1:4000",
             ],
         },
         serverRuntimeConfig: {

@@ -6,6 +6,7 @@ import { BarChart } from "@tremor/react";
 import { useState } from "react";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const dataFormatter = (number: number) =>
     Intl.NumberFormat("us").format(number).toString();
@@ -24,6 +25,7 @@ const Visual = ({
     title: string;
     col: string;
 }) => {
+    console.log(data);
     const router = useRouter();
     const compareContext = useCompareContext();
     const [fixedValue, setFixedValue] = useState("");
@@ -450,6 +452,20 @@ const Visual = ({
                         </div>
                     </div>
                 ) : null}
+            </div>
+            <div className="flex flex-row flex-wrap text-white">
+                {}
+                {data.graphs.map((graph) => {
+                    return "http://127.0.0.1:4000" + graph;
+                    // return (
+                    //     <Image
+                    //         src={"http://127.0.0.1:4000" + graph}
+                    //         alt="graph"
+                    //         width={200}
+                    //         height={100}
+                    //     />
+                    // );
+                })}
             </div>
         </div>
     );
