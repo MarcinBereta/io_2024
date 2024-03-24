@@ -67,7 +67,8 @@ const Visual = ({
                     }}
                     onClick={async () => {
                         const res = await fetch(
-                            `${address}/files/${title}/fixes/${col}/normalize`,{
+                            `${address}/files/${title}/fixes/${col}/normalize`,
+                            {
                                 cache: "no-store",
                                 method: "GET",
                             }
@@ -88,10 +89,11 @@ const Visual = ({
                     }}
                     onClick={async () => {
                         const res = await fetch(
-                            `${address}/files/${title}/fixes/${col}/average`
-                        ,{
+                            `${address}/files/${title}/fixes/${col}/average`,
+                            {
                                 cache: "no-store",
-                            });
+                            }
+                        );
                         if (res.status == 200 || res.status == 201)
                             // router.refresh();
                             window.location.reload();
@@ -108,11 +110,12 @@ const Visual = ({
                     }}
                     onClick={async () => {
                         const res = await fetch(
-                            `${address}/files/${title}/fixes/${col}/median`
-                        ,{
+                            `${address}/files/${title}/fixes/${col}/median`,
+                            {
                                 cache: "no-store",
                                 method: "GET",
-                            });
+                            }
+                        );
                         if (res.status == 200 || res.status == 201)
                             // router.refresh();
                             window.location.reload();
@@ -129,11 +132,12 @@ const Visual = ({
                     }}
                     onClick={async () => {
                         const res = await fetch(
-                            `${address}/files/${title}/fixes/${col}/mostcommon`
-                        ,{
+                            `${address}/files/${title}/fixes/${col}/mostcommon`,
+                            {
                                 cache: "no-store",
                                 method: "GET",
-                            });
+                            }
+                        );
                         if (res.status == 200 || res.status == 201)
                             // router.refresh();
                             window.location.reload();
@@ -155,11 +159,12 @@ const Visual = ({
                         className="text-white p-2 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/2 cursor-pointer"
                         onClick={async () => {
                             const res = await fetch(
-                                `${address}/files/${title}/fixes/${col}/fixed/${fixedValue}`
-                            ,{
-                                cache: "no-store",
-                                method: "GET",
-                            });
+                                `${address}/files/${title}/fixes/${col}/fixed/${fixedValue}`,
+                                {
+                                    cache: "no-store",
+                                    method: "GET",
+                                }
+                            );
                             if (res.status == 200 || res.status == 201)
                                 // router.refresh();
                                 window.location.reload();
@@ -178,7 +183,8 @@ const Visual = ({
                     }}
                     onClick={async () => {
                         const res = await fetch(
-                            `${address}/files/${title}/fixes/${col}/normalize`,{
+                            `${address}/files/${title}/fixes/${col}/normalize`,
+                            {
                                 cache: "no-store",
                                 method: "GET",
                             }
@@ -198,7 +204,8 @@ const Visual = ({
                     }}
                     onClick={async () => {
                         const res = await fetch(
-                            `${address}/files/${title}/fixes/${col}/mostcommon`,{
+                            `${address}/files/${title}/fixes/${col}/mostcommon`,
+                            {
                                 cache: "no-store",
                                 method: "GET",
                             }
@@ -224,10 +231,11 @@ const Visual = ({
                         className="text-white p-2 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/2 cursor-pointer"
                         onClick={async () => {
                             const res = await fetch(
-                                `${address}/files/${title}/fixes/${col}/fixed/${fixedValue}`,{
-                                cache: "no-store",
-                                method: "GET",
-                            }
+                                `${address}/files/${title}/fixes/${col}/fixed/${fixedValue}`,
+                                {
+                                    cache: "no-store",
+                                    method: "GET",
+                                }
                             );
                             if (res.status == 200 || res.status == 201)
                                 // router.refresh();
@@ -248,14 +256,21 @@ const Visual = ({
                         {
                             cache: "no-store",
                             method: "PUT",
+                                headers: {
+                                        'Content-Type': 'application/json'
+                                    },
                             body: JSON.stringify({
                                 name: varName,
                                 values: values,
                             }),
                         }
                     );
-                    if (res.status == 200 || res.status == 201)
-                        router.refresh();
+                    if (res.status == 200 || res.status == 201){
+                        router.push(`/files/${title}/${varName}`);
+                        router.refresh();}
+                    else if (res.status == 409){
+                        alert("Column name already exists");
+                    }
                 }}>
                 Update
             </div>
@@ -278,8 +293,8 @@ const Visual = ({
                         onChange={(e) => setVarName(e.target.value)}
                     />
                 </div>
-                <div>
-                    <div>
+                <div className="p-2 m-2">
+                    <div className="ml-2 flex-row flex gap-5">
                         <button
                             className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 w-full"
                             onClick={() => {
@@ -290,6 +305,21 @@ const Visual = ({
                                 }
                             }}>
                             {isCompared ? "Remove from compare" : "Compare"}
+                        </button>
+                        <button
+                            className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 w-full"
+                            onClick={() => {
+                                compareContext.cleanCompare();
+                                setIsCompareOpen(false);
+                            }}>
+                            Clean compare
+                        </button>
+                        <button
+                            className="text-white p-3 rounded hover:border-gray-600 text-xl bg-slate-400 ml-4"
+                            onClick={() => {
+                                router.push(`/files/${title}`);
+                            }}>
+                            Back
                         </button>
                     </div>
                 </div>
