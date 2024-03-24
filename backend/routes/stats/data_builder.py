@@ -89,6 +89,6 @@ def get_num_data(col_csv):
 
 def round_num_result(arr):
     for pair in arr:
-        print(pair["values"])
-        pair["values"] = round(pair["values"], 2)
+        if pair["values"] is not None:
+            pair["values"] = round(pair["values"], 2)
     return arr

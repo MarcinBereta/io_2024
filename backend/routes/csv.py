@@ -88,16 +88,16 @@ def parse_value(v):
     if v == "" or v is None:
         return [None, "null"]
     try:
-        return [int(v), "normal"]
+        return [float(v), "normal"]
     except ValueError:
         try:
-            return [float(v), "normal"]
+            return [int(v), "normal"]
         except ValueError:
             return [v, "normal"]
 
 
 def set_column_type(column):
-    if all(value['value'] == "" for value in column) or all(value['value'] == None for value in column):
+    if all(value['value'] == "" for value in column) or all(value['value'] is None for value in column):
         return "col_null"
     elif any(is_float(value['value']) or is_int(value['value']) for value in column):
         return "number"
@@ -228,6 +228,7 @@ async def get_csv_col(fileId, colId):  # one csv
             delete_row_null_type(fileId)
             col["details"], col["graphs"] = data_builder.get_data(col["values"], col["type"], col["name"])
             print(col["graphs"])
+            row_null_type_set(fileId)
             return col
 
 
@@ -255,7 +256,7 @@ async def fix_cols(fileId):
         empty_columns = []
         cols = csvs[fileId]["cols"]
         for column in cols:
-            if all(value["value"] == None for value in column["values"]):
+            if all(value["value"] is None for value in column["values"]):
                 empty_columns.append(column)
         for column in empty_columns:
             cols.remove(column)
@@ -275,7 +276,7 @@ async def fix_rows(fileId):
             empty_rows.append([])
             i = 0
             for value in column["values"]:
-                if value["value"] == None:
+                if value["value"] is None:
                     empty_rows[-1].append(i)
                 i += 1
             if i > i_max:
@@ -302,9 +303,9 @@ async def update_const(fileId, columnName, fixedValue):
                 if column['type'] == "number":
                     fixedValue = float(fixedValue)
                     for value in column["values"]:
-                        if value["value"] == None:
+                        if value["value"] is None:
                             value["value"] = fixedValue
-                            value["type"] = parse_value(value["value"])
+                            value["type"] = parse_value(value["value"])[1]
 
                     return csvs[fileId]
 
@@ -318,15 +319,17 @@ async def update_median(fileId, columnName):
         for column in csvs[fileId]["cols"]:
             if column["name"] == columnName:
                 if column['type'] == "number":
-                    values = [float(value["value"]) for value in column["values"] if value["value"] != None]
+                    values = [float(value["value"]) for value in column["values"] if value["value"] is not None]
                     values.sort()
-                    median = values[len(values) // 2] if len(values) % 2 == 0 else (values[len(values) // 2] + values[
-                        len(values) // 2 + 1]) / 2
+                    print(len(values) // 2)
+                    median = values[len(values) // 2] if len(values) % 2 == 1 else (values[len(values) // 2 - 1] +
+                                                                                    values[
+                                                                                        len(values) // 2]) / 2
 
                     for value in column["values"]:
-                        if value["value"] == None:
-                            value["value"] = str(median)
-                            value["type"] = parse_value(value["value"])
+                        if value["value"] is None:
+                            value["value"] = median
+                            value["type"] = parse_value(value["value"])[1]
                     delete_row_null_type(fileId)
 
                     return csvs[fileId]
@@ -340,15 +343,15 @@ async def update_most_common(fileId, columnName):
     try:
         for column in csvs[fileId]["cols"]:
             if column["name"] == columnName:
-                values = [(value["value"]) for value in column["values"] if value["value"] != None]
+                values = [(value["value"]) for value in column["values"] if value["value"] is not None]
                 most_common = ""
                 for i in range(len(values)):
                     if values.count(values[i]) > values.count(most_common):
                         most_common = values[i]
                 for value in column["values"]:
                     if value["value"] is None:
-                        value["value"] = str(most_common)
-                        value["type"] = parse_value(value["value"])
+                        value["value"] = most_common
+                        value["type"] = parse_value(value["value"])[1]
                 delete_row_null_type(fileId)
                 return csvs[fileId]
 
@@ -362,13 +365,13 @@ async def update_avg(fileId, columnName):
         for column in csvs[fileId]["cols"]:
             if column["name"] == columnName:
                 if column['type'] == "number":
-                    values = [float(value["value"]) for value in column["values"] if value["value"] != None]
+                    values = [float(value["value"]) for value in column["values"] if value["value"] is not None]
                     avg = sum(values) / len(values)
                     avg = round(avg, 2)
                     for value in column["values"]:
                         if value["value"] is None:
-                            value["value"] = str(avg)
-                            value["type"] = parse_value(value["value"])
+                            value["value"] = avg
+                            value["type"] = parse_value(value["value"])[1]
                     delete_row_null_type(fileId)
                     return csvs[fileId]
                 else:
@@ -383,14 +386,13 @@ async def update_normalize(fileId, columnName):
         for column in csvs[fileId]["cols"]:
             if column["name"] == columnName:
                 if column['type'] == "number":
-                    values = [float(value["value"]) for value in column["values"] if value["value"] != None]
+                    values = [float(value["value"]) for value in column["values"] if value["value"] is not None]
                     max_value = max(values)
                     min_value = min(values)
                     for value in column["values"]:
                         if value["value"] is not None:
                             value["value"] = (float(value["value"]) - min_value) / (
                                     max_value - min_value)  # normalizacja min-max
-
                     return csvs[fileId]
                 else:
                     return {"error": "Column is not a number type"}, 400
@@ -404,20 +406,16 @@ async def update_column(fileId, columnName):
     data['values'] = [parse_value(value)[0] for value in data['values']]
     try:
         for column in csvs[fileId]["cols"]:
-            if "name" in data and data["name"] not in [col["name"] for col in csvs[fileId]["cols"]]:
-                column["name"] = data["name"]
-            else:
-                return {"error": f"Column with name '{data['name']}' already exists."}, 409
             if column["name"] == columnName:
+                if "name" in data and (data["name"] not in [col["name"] for col in csvs[fileId]["cols"]] or data[
+                    'name'] == columnName):
+                    column["name"] = data["name"]
+                else:
+                    return {"error": f"Column with name '{data['name']}' already exists."}, 409
                 for i, value in enumerate(data['values']):
                     column["values"][i]["value"] = parse_value(value)[0]
                     column["values"][i]["type"] = parse_value(value)[1]
-                type_c, val = column["values"][0]["type"], column["values"][0]["value"]
-                if type_c == "normal":
-                    if is_float(val):
-                        column["type"] = "number"
-                    else:
-                        column["type"] = "text"
+                column["type"] = set_column_type(column["values"])
                 return csvs[fileId]
         return {"error": "Column not found"}, 400
     except Exception as e:
@@ -512,6 +510,8 @@ async def download_csv_with_selected_values(fileId, newFileId):
     finally:
         if db.is_connected:
             await db.disconnect()
+
+
 @csv_route.route('/csv/files/<fileId>/graphs/<columnName>')
 async def get_graphs(fileId, columnName):
     try:
