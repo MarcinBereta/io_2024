@@ -1,3 +1,5 @@
+import glob
+from time import time
 import matplotlib.pyplot as plt
 import math
 import os
@@ -16,7 +18,7 @@ def count(column):
     return cat, amount
 
 
-def count_graph(column, label):
+def count_graph(column, label, userId, fileId):
     cat, quantity = count(column)
 
     yint = range(min(quantity), math.ceil(max(quantity)) + 1)
@@ -28,15 +30,23 @@ def count_graph(column, label):
     plt.yticks(yint)
     plt.title(f"Number of {label}")
     plt.tight_layout()
+    graphs_directory = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'static', userId, fileId, 'graphs')
+    existing_histograms = glob.glob(os.path.join(graphs_directory, f"{label}_num_hist_*.png"))
+    for histogram_path in existing_histograms:
+        os.remove(histogram_path)
+    os.makedirs(graphs_directory, exist_ok=True)
+
 
     file_name = f'{label}_cat_count.png'
-    path = os.path.join(os.path.dirname(__file__), f'../../../graphs', file_name)
+    path = os.path.join(os.path.dirname(__file__), graphs_directory, file_name)
     plt.savefig(path)
     plt.clf()
-    return f'/graphs/{file_name}'
+    g_path = os.path.join(userId, fileId, 'graphs', file_name)
+    g_path = g_path.replace("\\", "/")
+    return g_path
 
 
-def count_perc_graph(column, label):
+def count_perc_graph(column, label, userId, fileId):
     cat, quantity = count(column)
 
     plt.pie(quantity, autopct='%1.1f%%')
@@ -44,9 +54,16 @@ def count_perc_graph(column, label):
     plt.legend(cat, loc='best')
     plt.axis('equal')
     plt.tight_layout()
+    graphs_directory = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'static', userId, fileId, 'graphs')
+    existing_histograms = glob.glob(os.path.join(graphs_directory, f"{label}_num_hist_*.png"))
+    for histogram_path in existing_histograms:
+        os.remove(histogram_path)
+    os.makedirs(graphs_directory, exist_ok=True)
 
-    file_name = f'{label}_cat_count_perc.png'
-    path = os.path.join(os.path.dirname(__file__), f'../../../graphs', file_name)
+    file_name = f'{label}_cat_count_perc_{time()}.png'
+    path = os.path.join(os.path.dirname(__file__), graphs_directory, file_name)
     plt.savefig(path)
     plt.clf()
-    return f'/graphs/{file_name}'
+    g_path = os.path.join(userId, fileId, 'graphs', file_name)
+    g_path = g_path.replace("\\", "/")
+    return g_path

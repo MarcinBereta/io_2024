@@ -9,8 +9,8 @@ def get_data(col_csv, col_type, col_name, userId, fileId):
         data = get_num_data(col_csv)
         graphs.append(numerical.histogram_graph(arr_data, col_name, userId, fileId))
     elif col_type == 'text':
-        graphs.append(categorical.count_graph(arr_data, col_name))
-        graphs.append(categorical.count_perc_graph(arr_data, col_name))
+        graphs.append(categorical.count_graph(arr_data, col_name, userId, fileId))
+        graphs.append(categorical.count_perc_graph(arr_data, col_name, userId, fileId))
     return data, graphs
 
 
