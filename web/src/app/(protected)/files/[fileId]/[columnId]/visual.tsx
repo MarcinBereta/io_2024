@@ -456,7 +456,7 @@ const Visual = ({
                 <div className="flex flex-row flex-wrap text-white justify-center">
                     {data.graphs.map((graph, index) => (
                         <Image
-                            key={`${graph}_${index}`} // Unikalny klucz dla każdego obrazu
+                            key={`${graph}_${index}`}
                             src={`http://127.0.0.1:4000/csv/${graph}`}
                             alt={`graph_${index}`}
                             width={600}

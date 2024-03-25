@@ -67,7 +67,7 @@ const groupByData = (data: CSVColumnDetailed, data2: CSVColumnDetailed) => {
         count2: number;
     }[] = [];
     data.details.forEach((detail1, index) => {
-        if (data2.details[index].name === detail1.name) {
+        if (data2.details[index] && data2.details[index].name === detail1.name) { // added data2.details[index] check
             const detail2 = data2.details[index];
             if (typeof detail1.values === "number")
                 parsedData.push({
@@ -112,15 +112,15 @@ const Page = async ({
     );
     const data2 = await res2.json();
 
-    const res3 = await fetch(
-        `http://127.0.0.1:4000/csv/${fieldId}/data/${col1}/${col2}`
-    );
+    // const res3 = await fetch(
+    //     `http://127.0.0.1:4000/csv/${fieldId}/data/${col1}/${col2}` // temporary removed
+    // );
 
     // const data = generateMockData();
 
     // const data2 = generateMockData();
 
-    const data3 = await res3.json();
+    // const data3 = await res3.json(); // temporary removed
 
     const groupedData = groupByData(data, data2);
     return (
@@ -132,7 +132,7 @@ const Page = async ({
                     groupedData={groupedData}
                     title={fieldId}
                     cols={[col1, col2]}
-                    graphs={data3}
+                    // graphs={data3} // temporary removed
                 />
             </div>
         </div>

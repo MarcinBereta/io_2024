@@ -1,15 +1,11 @@
-from datetime import datetime, time
-from random import random
-from wsgiref.types import FileWrapper
-
-from flask import Blueprint, request, redirect, flash, send_from_directory, jsonify
+from datetime import datetime
+from flask import Blueprint, request, redirect, flash, send_from_directory
 from prisma import Prisma, register
 from werkzeug.utils import secure_filename, send_file
 import os
 import uuid
 import csv
 import shutil
-from copy import deepcopy
 import json
 from stats import data_builder
 
@@ -20,11 +16,6 @@ register(db)
 ALLOWED_EXTENSIONS = {'csv'}
 csvs = {}
 userID = ""
-"""
-/csv/{user}/{id}/data/{zmienna}/updateDetail - POST ustawia puste na określoną rzecz z szczegółów np. mediana średnia itp (to co będzie w details[name] 
-/csv/files/{userId}/{id}/img/{img} - GET wszystkie wykresy itp
-/csv/files/{userId}/{id}/csv/{img} - GET wszystkie csv'ki
-"""
 
 
 def is_float(s):
@@ -222,7 +213,7 @@ async def get_csv_col(fileId, colId):  # one csv
             )
             handle_csv(fileId, csv_file.path, csv_file.name)
             csvFile = csvs[fileId]
-        except:
+        except Exception as e:
             return {"error": "File not found"}, 400
         finally:
             await db.disconnect()
