@@ -453,20 +453,17 @@ const Visual = ({
                     </div>
                 ) : null}
             </div>
-            <div className="flex flex-row flex-wrap text-white">
-                {}
-                {data.graphs.map((graph) => {
-                    return "http://127.0.0.1:4000" + graph;
-                    // return (
-                    //     <Image
-                    //         src={"http://127.0.0.1:4000" + graph}
-                    //         alt="graph"
-                    //         width={200}
-                    //         height={100}
-                    //     />
-                    // );
-                })}
-            </div>
+                <div className="flex flex-row flex-wrap text-white justify-center">
+                    {data.graphs.map((graph, index) => (
+                        <Image
+                            key={`${graph}_${index}`} // Unikalny klucz dla każdego obrazu
+                            src={`http://127.0.0.1:4000/csv/${graph}`}
+                            alt={`graph_${index}`}
+                            width={600}
+                            height={500}
+                        />
+                    ))}
+                </div>
         </div>
     );
 };
