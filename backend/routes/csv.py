@@ -1,13 +1,11 @@
 from datetime import datetime
-
 from flask import Blueprint, request, redirect, flash, send_from_directory
 from prisma import Prisma, register
-from werkzeug.utils import secure_filename
+from werkzeug.utils import secure_filename, send_file
 import os
 import uuid
 import csv
 import shutil
-from copy import deepcopy
 import json
 from stats import data_builder
 
@@ -17,11 +15,7 @@ db = Prisma()
 register(db)
 ALLOWED_EXTENSIONS = {'csv'}
 csvs = {}
-"""
-/csv/{user}/{id}/data/{zmienna}/updateDetail - POST ustawia puste na określoną rzecz z szczegółów np. mediana średnia itp (to co będzie w details[name] 
-/csv/files/{userId}/{id}/img/{img} - GET wszystkie wykresy itp
-/csv/files/{userId}/{id}/csv/{img} - GET wszystkie csv'ki
-"""
+userID = ""
 
 
 def is_float(s):
@@ -219,15 +213,16 @@ async def get_csv_col(fileId, colId):  # one csv
             )
             handle_csv(fileId, csv_file.path, csv_file.name)
             csvFile = csvs[fileId]
-        except:
+        except Exception as e:
             return {"error": "File not found"}, 400
         finally:
             await db.disconnect()
+    global userID
     for col in csvFile["cols"]:
         if col["name"] == colId:
             delete_row_null_type(fileId)
-            col["details"], col["graphs"] = data_builder.get_data(col["values"], col["type"], col["name"])
-            print(col["graphs"])
+            col["details"], col["graphs"] = data_builder.get_data(col["values"], col["type"], col["name"], userID,
+                                                                  fileId)
             row_null_type_set(fileId)
             return col
 
@@ -321,7 +316,6 @@ async def update_median(fileId, columnName):
                 if column['type'] == "number":
                     values = [float(value["value"]) for value in column["values"] if value["value"] is not None]
                     values.sort()
-                    print(len(values) // 2)
                     median = values[len(values) // 2] if len(values) % 2 == 1 else (values[len(values) // 2 - 1] +
                                                                                     values[
                                                                                         len(values) // 2]) / 2
@@ -416,6 +410,7 @@ async def update_column(fileId, columnName):
                     column["values"][i]["value"] = parse_value(value)[0]
                     column["values"][i]["type"] = parse_value(value)[1]
                 column["type"] = set_column_type(column["values"])
+
                 return csvs[fileId]
         return {"error": "Column not found"}, 400
     except Exception as e:
@@ -454,6 +449,7 @@ async def download_csv(fileId):
             where={"id": fileId}
         )
         directory, filename = os.path.split(csv_file.path)
+        print(directory, filename)
         return send_from_directory(directory, filename, as_attachment=True)
     finally:
         if db.is_connected:
@@ -512,11 +508,19 @@ async def download_csv_with_selected_values(fileId, newFileId):
             await db.disconnect()
 
 
-@csv_route.route('/csv/files/<fileId>/graphs/<columnName>')
-async def get_graphs(fileId, columnName):
+@csv_route.route('/csv/<path:graphpath>', methods=['GET'])
+def get_graph(graphpath):
     try:
-        for column in csvs[fileId]["cols"]:
-            if column["name"] == columnName:
-                return column["graphs"]
+        graphpath = graphpath.replace("/", "\\")
+        directory = os.path.join('static', graphpath)
+
+        response = send_file(directory, environ=request.environ)
+
+        response.headers['Cache-Control'] = 'no-cache'
+        response.headers['Cache-Control'] = 'max-age=0'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+
+        return response
     except Exception as e:
-        return {"error, column not exist": str(e)}, 400
+        return {"error": str(e)}, 400

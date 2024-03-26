@@ -16,7 +16,7 @@ const Visual = ({
     data2,
     title,
     cols,
-    graphs,
+    // graphs, temporary removed
 }: {
     data: CSVColumnDetailed;
     groupedData: {
@@ -28,7 +28,7 @@ const Visual = ({
 
     title: string;
     cols: string[];
-    graphs: string[];
+    // graphs: string[]; temporary removed
 }) => {
     return (
         <div
