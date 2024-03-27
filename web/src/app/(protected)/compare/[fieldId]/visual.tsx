@@ -16,8 +16,8 @@ const Visual = ({
     data2,
     title,
     cols,
-    // graphs, temporary removed
-}: {
+}: // graphs, temporary removed
+{
     data: CSVColumnDetailed;
     groupedData: {
         name: string;
@@ -31,9 +31,7 @@ const Visual = ({
     // graphs: string[]; temporary removed
 }) => {
     return (
-        <div
-            className="flex flex-col w-full h-full "
-            style={{ maxHeight: "calc(80vh - 2.5rem)" }}>
+        <div className="flex flex-col w-full h-full ">
             <div className="flex flex-row justify-center text-white">
                 <div className=" text-2xl">{title}</div>
             </div>
@@ -42,7 +40,7 @@ const Visual = ({
                     return (
                         <div
                             key={index}
-                            className="flex flex-row justify-center items-center w-auto min-w-20 bg-slate-500 text-white ">
+                            className="flex flex-row justify-center items-center w-auto min-w-20 bg-slate-500 text-white p-3 rounded-xl">
                             {col}
                         </div>
                     );
@@ -103,28 +101,28 @@ const Visual = ({
                 </div>
             </div>
             <div className="w-full flex flex-row p-2">
-                <div className="flex flex-row w-2/4 h-full items-center">
-                    <div className="flex flex-row gap-4 flex-wrap w-3/4 justify-center">
+                <div className="flex flex-row w-2/4 h-full items-center justify-center">
+                    <div className="flex flex-row gap-4 flex-wrap w-3/4 justify-center ">
                         {data.details.map((detail) => {
                             return (
                                 <div
                                     key={detail.name}
-                                    className="text-white p-8 bg-slate-500 rounded-md">
-                                    <p>{detail.name}</p>
+                                    className="text-white p-8 bg-slate-500 rounded-md w-1/4 flex items-center justify-center flex-col">
+                                    <b>{detail.name}</b>
                                     <p>{detail.values as string}</p>
                                 </div>
                             );
                         })}
                     </div>
                 </div>
-                <div className="flex flex-col w-2/4 h-full items-center">
-                    <div className="flex flex-row gap-4 flex-wrap w-3/4 justify-center">
+                <div className="flex flex-col w-2/4 h-full items-center justify-center">
+                    <div className="flex flex-row gap-4 flex-wrap w-3/4 justify-center items-center ">
                         {data2.details.map((detail) => {
                             return (
                                 <div
                                     key={detail.name}
-                                    className="text-white p-8 bg-slate-500 rounded-md">
-                                    <p>{detail.name}</p>
+                                    className="text-white p-8 bg-slate-500 rounded-md w-1/4 flex items-center justify-center flex-col">
+                                    <b>{detail.name}</b>
                                     <p>{detail.values as string}</p>
                                 </div>
                             );

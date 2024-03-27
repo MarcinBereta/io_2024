@@ -7,9 +7,7 @@ import { useState } from "react";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-
-const dataFormatter = (number: number) =>
-    Intl.NumberFormat("us").format(number).toString();
+const address = "http://127.0.0.1:4000/csv";
 
 const Visual = ({
     data,
@@ -57,12 +55,11 @@ const Visual = ({
 
     const generateButtons = (): React.ReactNode[] => {
         const arr: React.ReactNode[] = [];
-        const address = "http://127.0.0.1:4000/csv";
         if (data.type == "number") {
             arr.push(
                 <div
                     key="fix"
-                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400  cursor-pointer"
+                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400  cursor-pointer h-16 flex justify-center items-center"
                     style={{
                         width: "calc(50% - 0.5rem)",
                     }}
@@ -84,7 +81,7 @@ const Visual = ({
             arr.push(
                 <div
                     key="normalize"
-                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400  cursor-pointer"
+                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400  cursor-pointer h-16 flex justify-center items-center"
                     style={{
                         width: "calc(50% - 0.5rem)",
                     }}
@@ -105,7 +102,7 @@ const Visual = ({
             arr.push(
                 <div
                     key="normalize"
-                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400  cursor-pointer"
+                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400  cursor-pointer h-16 flex justify-center items-center"
                     style={{
                         width: "calc(50% - 0.5rem)",
                     }}
@@ -127,7 +124,7 @@ const Visual = ({
             arr.push(
                 <div
                     key="normalize"
-                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 cursor-pointer"
+                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 cursor-pointer h-16 flex justify-center items-center"
                     style={{
                         width: "calc(50% - 0.5rem)",
                     }}
@@ -147,9 +144,12 @@ const Visual = ({
                 </div>
             );
             arr.push(
-                <div className="flex flex-row p-2 space-x-2  w-full">
+                <div className="flex flex-row space-x-2  w-full h-16">
                     <input
-                        className="bg-slate-500 rounded-md  text-white w-1/2"
+                        className="bg-slate-500 rounded-md  text-white pl-2"
+                        style={{
+                            width: "calc(50% - 0.5rem)",
+                        }}
                         type="text"
                         placeholder="Set constant value"
                         value={fixedValue}
@@ -157,7 +157,10 @@ const Visual = ({
                     />
                     <div
                         key="normalize"
-                        className="text-white p-2 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/2 cursor-pointer"
+                        className="text-white p-2 rounded hover:border-gray-600 text-xl  bg-slate-400 cursor-pointer flex items-center justify-center"
+                        style={{
+                            width: "calc(50% - 0.5rem)",
+                        }}
                         onClick={async () => {
                             const res = await fetch(
                                 `${address}/files/${title}/fixes/${col}/fixed/${fixedValue}`,
@@ -178,7 +181,7 @@ const Visual = ({
             arr.push(
                 <div
                     key="fix"
-                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 cursor-pointer"
+                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 cursor-pointer h-16 flex justify-center items-center"
                     style={{
                         width: "calc(50% - 0.5rem)",
                     }}
@@ -199,7 +202,7 @@ const Visual = ({
             arr.push(
                 <div
                     key="normalize"
-                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/2 cursor-pointer"
+                    className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/2 cursor-pointer h-16 flex justify-center items-center"
                     style={{
                         width: "calc(50% - 0.5rem)",
                     }}
@@ -219,9 +222,12 @@ const Visual = ({
                 </div>
             );
             arr.push(
-                <div className="flex flex-row p-2 space-x-2  w-full">
+                <div className="flex flex-row space-x-2  w-full h-16">
                     <input
-                        className="bg-slate-500 rounded-md  text-white w-1/2"
+                        className="bg-slate-500 rounded-md  text-white pl-2"
+                        style={{
+                            width: "calc(50% - 0.5rem)",
+                        }}
                         type="text"
                         placeholder="Set constant value"
                         value={fixedValue}
@@ -229,7 +235,10 @@ const Visual = ({
                     />
                     <div
                         key="normalize"
-                        className="text-white p-2 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/2 cursor-pointer"
+                        className="text-white p-2 rounded hover:border-gray-600 text-xl  bg-slate-400 cursor-pointer flex items-center justify-center"
+                        style={{
+                            width: "calc(50% - 0.5rem)",
+                        }}
                         onClick={async () => {
                             const res = await fetch(
                                 `${address}/files/${title}/fixes/${col}/fixed/${fixedValue}`,
@@ -250,7 +259,7 @@ const Visual = ({
         arr.push(
             <div
                 key="update"
-                className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 w-full cursor-pointer"
+                className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 w-full cursor-pointer h-16 items-center justify-center flex"
                 onClick={async () => {
                     const res = await fetch(
                         `${address}/files/${title}/fixes/${col}`,
@@ -280,12 +289,26 @@ const Visual = ({
         return arr;
     };
 
+    const handleTypeChange = async () => {
+        const res = await fetch(`${address}/files/${title}/changeType}`, {
+            cache: "no-store",
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        if (res.status == 200 || res.status == 201) {
+            router.push(`/files/${title}/${varName}`);
+            router.refresh();
+        } else if (res.status == 409) {
+            alert("Column name already exists");
+        }
+    };
+
     return (
-        <div
-            className="flex flex-col w-full h-full relative"
-            style={{ maxHeight: "calc(70vh - 2.5rem)" }}>
+        <div className="flex flex-col w-full h-full relative gap-5">
             <div className="flex flex-row">
-                <div className="flex flex-col text-white">
+                <div className="flex flex-col text-white w-1/3">
                     <div className=" text-2xl">{title}</div>
                     <input
                         className="text-white bg-transparent hover:border-gray-600 text-xl w-full"
@@ -294,10 +317,10 @@ const Visual = ({
                         onChange={(e) => setVarName(e.target.value)}
                     />
                 </div>
-                <div className="p-2 m-2">
-                    <div className="ml-2 flex-row flex gap-5">
+                <div className="p-2 m-2 w-2/3">
+                    <div className="ml-2 flex-row flex gap-5 w-full justify-around">
                         <button
-                            className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 w-full"
+                            className="w-1/5 text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 "
                             onClick={() => {
                                 if (isCompared) {
                                     compareContext.removeCompare(title, col);
@@ -308,7 +331,7 @@ const Visual = ({
                             {isCompared ? "Remove from compare" : "Compare"}
                         </button>
                         <button
-                            className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 w-full"
+                            className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/5"
                             onClick={() => {
                                 compareContext.cleanCompare();
                                 setIsCompareOpen(false);
@@ -316,7 +339,14 @@ const Visual = ({
                             Clean compare
                         </button>
                         <button
-                            className="text-white p-3 rounded hover:border-gray-600 text-xl bg-slate-400 ml-4"
+                            className="text-white p-3 rounded hover:border-gray-600 text-xl  bg-slate-400 w-1/5"
+                            onClick={handleTypeChange}>
+                            {data.type == "text"
+                                ? "Change to numeric"
+                                : "Change to categorical"}
+                        </button>
+                        <button
+                            className="w-1/5 text-white p-3 rounded hover:border-gray-600 text-xl bg-slate-400 ml-4"
                             onClick={() => {
                                 router.push(`/files/${title}`);
                             }}>
@@ -325,7 +355,7 @@ const Visual = ({
                     </div>
                 </div>
             </div>
-            <div className="flex flex-row w-full">
+            <div className="flex flex-row w-full gap-5">
                 <div
                     className=" w-1/4 h-full"
                     style={{ maxHeight: "calc(70vh - 2.5rem)" }}>
@@ -370,7 +400,7 @@ const Visual = ({
                         })}
                     </PerfectScrollbar>
                 </div>
-                <div className="flex flex-col w-3/4 h-full items-center">
+                <div className="flex flex-col w-3/4 h-full items-center gap-10">
                     <div className=" flex flex-wrap flex-row gap-2 p-2">
                         {generateButtons()}
                     </div>
@@ -379,23 +409,13 @@ const Visual = ({
                             return (
                                 <div
                                     key={detail.name}
-                                    className="text-white p-8 bg-slate-500 rounded-md">
-                                    <p>{detail.name}</p>
+                                    className="text-white p-8 bg-slate-500 rounded-md w-1/4 flex items-center justify-center flex-col">
+                                    <b>{detail.name}</b>
                                     <p>{detail.values as string}</p>
                                 </div>
                             );
                         })}
                     </div>
-                    <BarChart
-                        className="h-80 w-full"
-                        data={groupedData}
-                        index="name"
-                        categories={["count"]}
-                        colors={["blue"]}
-                        valueFormatter={dataFormatter}
-                        yAxisWidth={48}
-                        onValueChange={(v) => console.log(v)}
-                    />
                 </div>
             </div>
             <div className="absolute bottom-2 right-2 bg-slate-700 p-4 rounded-xl">
@@ -453,17 +473,17 @@ const Visual = ({
                     </div>
                 ) : null}
             </div>
-                <div className="flex flex-row flex-wrap text-white justify-center">
-                    {data.graphs.map((graph, index) => (
-                        <Image
-                            key={`${graph}_${index}`}
-                            src={`http://127.0.0.1:4000/csv/${graph}`}
-                            alt={`graph_${index}`}
-                            width={600}
-                            height={500}
-                        />
-                    ))}
-                </div>
+            <div className="flex flex-row flex-wrap text-white justify-center">
+                {data.graphs.map((graph, index) => (
+                    <Image
+                        key={`${graph}_${index}`}
+                        src={`http://127.0.0.1:4000/csv/${graph}`}
+                        alt={`graph_${index}`}
+                        width={600}
+                        height={500}
+                    />
+                ))}
+            </div>
         </div>
     );
 };
