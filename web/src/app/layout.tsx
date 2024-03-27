@@ -34,11 +34,7 @@ export default async function RootLayout({
                         }}
                         className=" w-full flex flex-col gap-y-5">
                         <Navbar key={"1"} />
-                        <div
-                            className="w-full flex "
-                            style={{ minHeight: "calc(80vh - 2.5rem)" }}>
-                            {children}
-                        </div>
+                        <div className="w-full flex ">{children}</div>
                     </div>
                 </body>
             </html>
