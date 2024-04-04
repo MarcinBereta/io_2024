@@ -1,34 +1,24 @@
 "use client";
-import { useCompareContext } from "@/components/contexts/ComparissionContext";
 import { cn } from "@/lib/utils";
-import { CSVColumnDetailed } from "@/types";
-import { BarChart } from "@tremor/react";
-import { compare } from "bcryptjs";
-import { useState } from "react";
+import { CSVColumnDetailed, CSVCompareDetailed } from "@/types";
 import PerfectScrollbar from "react-perfect-scrollbar";
+import Image from "next/image";
 
 const dataFormatter = (number: number) =>
     Intl.NumberFormat("us").format(number).toString();
 
 const Visual = ({
     data,
-    groupedData,
     data2,
     title,
     cols,
-}: // graphs, temporary removed
-{
+    compare,
+}: {
     data: CSVColumnDetailed;
-    groupedData: {
-        name: string;
-        count1: number;
-        count2: number;
-    }[];
     data2: CSVColumnDetailed;
-
     title: string;
     cols: string[];
-    // graphs: string[]; temporary removed
+    compare: CSVCompareDetailed;
 }) => {
     return (
         <div className="flex flex-col w-full h-full ">
@@ -130,18 +120,33 @@ const Visual = ({
                     </div>
                 </div>
             </div>
-            {groupedData.length == 0 ? null : (
-                <BarChart
-                    className="h-80 w-full"
-                    data={groupedData}
-                    index="name"
-                    categories={["count1", "count2"]}
-                    colors={["blue", "teal"]}
-                    valueFormatter={dataFormatter}
-                    yAxisWidth={48}
-                    onValueChange={(v) => console.log(v)}
-                />
-            )}
+            <div className="w-full flex flex-row p-2 justify-center items-center">
+                <div className="flex flex-col w-2/4 h-full items-center justify-center">
+                    <div className="flex flex-row gap-4 flex-wrap w-3/4 justify-center items-center ">
+                        {compare.details.map((detail) => {
+                            return (
+                                <div
+                                    key={detail.name}
+                                    className="text-white p-8 bg-slate-500 rounded-md w-1/4 flex items-center justify-center flex-col">
+                                    <b>{detail.name}</b>
+                                    <p>{detail.values as string}</p>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </div>
+            <div className="flex flex-row flex-wrap text-white justify-center">
+                {compare.graphs.map((graph, index) => (
+                    <Image
+                        key={`${graph}_${index}`}
+                        src={`http://127.0.0.1:4000/csv/${graph}`}
+                        alt={`graph_${index}`}
+                        width={600}
+                        height={500}
+                    />
+                ))}
+            </div>
         </div>
     );
 };

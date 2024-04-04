@@ -30,3 +30,11 @@ export type CSVUpdateColConst = {
     userId: string;
     value: string | number | Date;
 };
+
+export type CSVCompareDetailed = {
+    details: {
+        values: string | number | Date | null;
+        name: string;
+    }[];
+    graphs: String[];
+};

@@ -60,27 +60,6 @@ const generateMockData = () => {
     return csvDetails;
 };
 
-const groupByData = (data: CSVColumnDetailed, data2: CSVColumnDetailed) => {
-    const parsedData: {
-        name: string;
-        count1: number;
-        count2: number;
-    }[] = [];
-    data.details.forEach((detail1, index) => {
-        if (data2.details[index] && data2.details[index].name === detail1.name) { // added data2.details[index] check
-            const detail2 = data2.details[index];
-            if (typeof detail1.values === "number")
-                parsedData.push({
-                    name: detail1.name,
-                    count1: detail1.values as number,
-                    count2: detail2.values as number,
-                });
-        }
-    });
-
-    return parsedData;
-};
-
 const Page = async ({
     params: { fieldId, columnId },
     searchParams: { col1, col2 },
@@ -112,26 +91,21 @@ const Page = async ({
     );
     const data2 = await res2.json();
 
-    // const res3 = await fetch(
-    //     `http://127.0.0.1:4000/csv/${fieldId}/data/${col1}/${col2}` // temporary removed
-    // );
+    const res3 = await fetch(
+        `http://127.0.0.1:4000/csv/${fieldId}/data/${col1}/${col2}` // temporary removed
+    );
 
-    // const data = generateMockData();
+    const data3 = await res3.json(); // temporary removed
 
-    // const data2 = generateMockData();
-
-    // const data3 = await res3.json(); // temporary removed
-
-    const groupedData = groupByData(data, data2);
     return (
         <div className="w-full h-full">
             <div className="w-full h-full flex justify-center items-center">
                 <Visual
                     data={data}
                     data2={data2}
-                    groupedData={groupedData}
                     title={fieldId}
                     cols={[col1, col2]}
+                    compare={data3}
                     // graphs={data3} // temporary removed
                 />
             </div>
