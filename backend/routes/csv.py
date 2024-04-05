@@ -223,6 +223,8 @@ async def get_csv_col(fileId, colId):  # one csv
             delete_row_null_type(fileId)
             col["details"], col["graphs"] = data_builder.get_data(col["values"], col["type"], col["name"], userID,
                                                                   fileId)
+            print(col)
+            print(col["details"])
             row_null_type_set(fileId)
             return col
 

@@ -1,17 +1,27 @@
 import numpy as np
 from matplotlib import pyplot as plt
+from scipy import stats
 
 
 def z_test(column1, column2):
-    pass
+    val, p_val = None, None
+    try:
+        val, p_val = stats.ranksums(column1, column2)
+    except ValueError:
+        pass
+    return val, p_val
 
 
 def t_test(column1, column2):
-    pass
+    val, p_val = stats.ttest_ind(column1, column2)
+    return val, p_val
 
 
-def anova(column1, column2):
-    pass
+def anova(num_column, cat_column):
+    unique_cats = sorted(set(cat_column))
+    no_unique_cats = len(unique_cats)
+    groups = [[] for _ in range(no_unique_cats)]
+
 
 #TODO
 def error_bar_graph(column_cat, column_num):
