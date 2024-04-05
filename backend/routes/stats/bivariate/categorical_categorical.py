@@ -1,6 +1,9 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.stats import chi2_contingency
+import os
+import glob
+from time import time
 
 
 def chi2_test(column1, column2):
@@ -18,7 +21,7 @@ def chi2_test(column1, column2):
     return chi2_value, p_value, df
 
 
-def stacked_column_chart(column1, label1, column2, label2):
+def stacked_column_chart(column1, label1, column2, label2, userId, fileId):
     unique_1 = sorted(set(column1))
     unique_2 = sorted(set(column2))
     contingency = np.zeros((len(unique_1), len(unique_2)))
@@ -43,7 +46,18 @@ def stacked_column_chart(column1, label1, column2, label2):
     ax.legend(loc='upper left', bbox_to_anchor=(1.05, 1), borderaxespad=0., title=label2)
 
     plt.tight_layout()
-    plt.show()
+    graphs_directory = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'static', userId, fileId, 'graphs')
+    existing_histograms = glob.glob(os.path.join(graphs_directory, f"{label1}_{label2}_cat_cat_stacked_*.png"))
+    for histogram_path in existing_histograms:
+        os.remove(histogram_path)
+    os.makedirs(graphs_directory, exist_ok=True)
+    file_name = f'{label1}_{label2}_cat_cat_stacked_{time()}.png'
+    path = os.path.join(os.path.dirname(__file__), graphs_directory, file_name)
+    plt.savefig(path)
+    plt.clf()
+    g_path = os.path.join(userId, fileId, 'graphs',file_name)
+    g_path = g_path.replace("\\", "/")
+    return g_path
 
 
 # TODO
@@ -84,7 +98,7 @@ arr2 = ['none', 'soft', 'none', 'hard', 'none', 'soft', 'none', 'hard', 'none', 
 
 
 #stacked_column_chart(arr2, 'test2', arr1, 'test1')
-#combination_chart(arr2, 'test2', arr1, 'test1')
+combination_chart(arr2, 'test2', arr1, 'test1')
 
 
 

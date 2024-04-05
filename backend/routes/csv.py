@@ -223,15 +223,49 @@ async def get_csv_col(fileId, colId):  # one csv
             delete_row_null_type(fileId)
             col["details"], col["graphs"] = data_builder.get_data(col["values"], col["type"], col["name"], userID,
                                                                   fileId)
-            print(col)
-            print(col["details"])
             row_null_type_set(fileId)
             return col
 
 
-# ex
-# finally:
-#     await db.disconnect()
+@csv_route.route('/csv/<fileId>/data/<colId1>/<colId2>', methods=['GET'])
+async def get_csv_cols(fileId, colId1, colId2):
+    try:
+        csvFile = csvs[fileId]
+    except Exception as e:
+        await db.connect()
+        try:
+            csv_file = await db.csvfile.find_unique(
+                where={"id": fileId}
+            )
+            handle_csv(fileId, csv_file.path, csv_file.name)
+            csvFile = csvs[fileId]
+        except Exception as e:
+            return {"error": "File not found"}, 400
+        finally:
+            await db.disconnect()
+    global userID
+
+    found_cols = []
+    for col in csvFile["cols"]:
+        if col["name"] == colId1 or col["name"] == colId2:
+            found_cols.append(col)
+            if len(found_cols) == 2:
+                delete_row_null_type(fileId)
+                pair_obj = {
+                    "name": f'{found_cols[0]["name"]}_{found_cols[1]["name"]}"',
+                    "type": 'Mixed',
+                    "values": [],
+                    "details": [],
+                    "graphs": []
+                }
+                pair_obj["details"], pair_obj["graphs"] = data_builder.get_data2d(found_cols[0]["values"],
+                                                                                  found_cols[0]["type"],
+                                                                                  found_cols[0]["name"],
+                                                                                  found_cols[1]["values"],
+                                                                                  found_cols[1]["type"],
+                                                                                  found_cols[1]["name"], userID, fileId)
+                row_null_type_set(fileId)
+                return pair_obj
 
 
 @csv_route.route('/csv/<fileId>/data/<columnName>', methods=['GET'])
