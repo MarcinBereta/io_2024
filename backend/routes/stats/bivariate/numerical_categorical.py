@@ -39,16 +39,35 @@ def anova_test(num_column, cat_column):
     f_val, p_val = stats.f_oneway(*groups)
     return f_val, p_val
 
-#TODO
-# def error_bar_graph(column_cat, column_num):
-#     num_error = np.std(column_num) * np.ones_like(column_num)
-#     plt.errorbar(column_cat, column_num, yerr=num_error, fmt='-o', color='blue', ecolor='red', capsize=5)
-#     plt.xlabel("Categories")
-#     plt.ylabel("Values")
-#     plt.grid()
-#     plt.show()
+
+def error_bar_graph(column_cat, column_num):
+    data = {}
+    for category, value in zip(column_cat, column_num):
+        if category not in data:
+            data[category] = []
+        data[category].append(value)
+
+    categories = []
+    means = []
+    std_errors = []
+
+    for category, values in data.items():
+        mean = np.mean(values)
+        std_error = stats.sem(values)
+
+        categories.append(category)
+        means.append(mean)
+        std_errors.append(std_error)
+
+    plt.errorbar(categories, means, yerr=std_errors, fmt='-o', color='blue', ecolor='red', capsize=5)
+    plt.xlabel("Categories")
+    plt.ylabel("Values")
+    plt.grid()
+    plt.show()
 
 
-column1 = np.array(['Male', 'Male', 'Female', 'Male', 'Male', 'Female', 'Female', 'Female', 'Unknown'])
-column2 = np.array([2, 3, 3, 5, 5, 1, 2, 6, 0])
-#print(anova_test(column2, column1))
+categories = ['A', 'B', 'C', 'D', 'E']
+column_cat = np.random.choice(categories, 100)
+
+column_num = np.random.normal(0, 1, 100)
+#error_bar_graph(column_cat, column_num)
