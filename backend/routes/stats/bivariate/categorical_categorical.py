@@ -60,45 +60,7 @@ def stacked_column_chart(column1, label1, column2, label2, userId, fileId):
     return g_path
 
 
-# TODO
-def combination_chart(column1, label1, column2, label2):
-    unique1 = sorted(set(column1))
-    unique_2 = sorted(set(column2))
-    count_1 = [column1.count(a) for a in unique1]
 
-    selected_category_percentage = []
-    for category in unique1:
-        selected_count = sum(1 for a, b in zip(column1, column2) if a == category and b == unique_2[0])
-        selected_category_percentage.append(selected_count / count_1[unique1.index(category)] * 100)
-
-    fig, ax1 = plt.subplots(figsize=(10, 6))
-
-    color = 'tab:blue'
-    ax1.set_xlabel(f'{label1}')
-    ax1.set_ylabel('Count', color=color)
-    ax1.bar(unique1, count_1, color=color)
-    ax1.tick_params(axis='y', labelcolor=color)
-
-    ax2 = ax1.twinx()
-    color = 'tab:red'
-    ax2.set_ylabel('Percentage of selected category', color=color)
-    ax2.plot(unique1, selected_category_percentage, color=color, marker='o')
-    ax2.tick_params(axis='y', labelcolor=color)
-
-    ax2.set_ylim(0, 100)
-
-    plt.title('Combination Chart')
-
-    fig.tight_layout()
-    plt.show()
-
-
-arr1 = ['young', 'young', 'young', 'young', 'young', 'young', 'young', 'young', 'pre-presbyopic', 'pre-presbyopic', 'pre-presbyopic', 'pre-presbyopic', 'pre-presbyopic', 'pre-presbyopic', 'pre-presbyopic', 'pre-presbyopic', 'presbyopic', 'presbyopic', 'presbyopic', 'presbyopic', 'presbyopic', 'presbyopic', 'presbyopic', 'presbyopic']
-arr2 = ['none', 'soft', 'none', 'hard', 'none', 'soft', 'none', 'hard', 'none', 'soft', 'none', 'hard', 'none', 'soft', 'none', 'none', 'none', 'none', 'none', 'hard', 'none', 'soft', 'none', 'none']
-
-
-#stacked_column_chart(arr2, 'test2', arr1, 'test1')
-combination_chart(arr2, 'test2', arr1, 'test1')
 
 
 

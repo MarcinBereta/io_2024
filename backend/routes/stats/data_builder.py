@@ -24,10 +24,10 @@ def get_data2d(col1_csv, col1_type, col1_name, col2_csv, col2_type, col2_name, u
         graphs.append(numerical_numerical.correlation_graph(arr1_data, col1_name, arr2_data, col2_name, userId, fileId))
     elif col1_type == 'number' and col2_type == 'text':
         data = get_num_cat_data(col1_csv, col2_csv)
-        #graphs.append(numerical_categorical.)
+        graphs.append(numerical_categorical.error_bar_graph(arr1_data, col1_name, arr2_data, col2_name, userId, fileId))
     elif col1_type == 'text' and col2_type == 'number':
         data = get_num_cat_data(col2_csv, col1_csv)
-        #graphs.append()
+        graphs.append(numerical_categorical.error_bar_graph(arr2_data, col2_name, arr1_data, col1_name, userId, fileId))
     elif col1_type == 'text' and col2_type == 'text':
         data = get_cat_cat_data(col1_csv, col2_csv)
         graphs.append(categorical_categorical.stacked_column_chart(col1_csv, col1_name, col2_csv, col2_name, userId, fileId))
