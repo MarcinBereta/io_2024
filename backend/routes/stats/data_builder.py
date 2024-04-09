@@ -31,6 +31,7 @@ def get_data2d(col1_csv, col1_type, col1_name, col2_csv, col2_type, col2_name, u
     elif col1_type == 'text' and col2_type == 'text':
         data = get_cat_cat_data(col1_csv, col2_csv)
         graphs.append(categorical_categorical.stacked_column_chart(col1_csv, col1_name, col2_csv, col2_name, userId, fileId))
+        graphs.append(categorical_categorical.stacked_column_chart(col2_csv, col2_name, col1_csv, col1_name, userId, fileId))
     return data, graphs
 
 
