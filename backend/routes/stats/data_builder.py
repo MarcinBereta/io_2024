@@ -124,18 +124,23 @@ def get_cat_cat_data(col1_csv, col2_csv):
 def get_num_cat_data(num_col_csv, cat_col_csv):
     num_col, cat_col = csv2d_to_arr(num_col_csv, cat_col_csv)
     test_name, test_val, p_val = numerical_categorical.param_test(num_col, cat_col)
+    anova_f_val, anova_p_val = numerical_categorical.anova_test(num_col, cat_col)
     result = [
         {
-            "name": "Test name:",
-            "values": 0
-        },
-        {
-            "name": "Value:",
+            "name": f"{test_name} Value:",
             "values": test_val
         },
         {
-            "name": "p:",
+            "name": f"{test_name}p:",
             "values": p_val
+        },
+        {
+            "name": "ANOVA F-value:",
+            "values": anova_f_val
+        },
+        {
+            "name": "ANOVA p-value:",
+            "values": anova_p_val
         }
     ]
     result = round_num_result(result, 3)
