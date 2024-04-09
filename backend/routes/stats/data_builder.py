@@ -128,11 +128,11 @@ def get_num_cat_data(num_col_csv, cat_col_csv):
     anova_f_val, anova_p_val = numerical_categorical.anova_test(num_col, cat_col)
     result = [
         {
-            "name": f"{test_name} Value:",
+            "name": f"{test_name}-test value:",
             "values": test_val
         },
         {
-            "name": f"{test_name} p-value:",
+            "name": f"{test_name}-test p-value:",
             "values": p_val
         },
         {
