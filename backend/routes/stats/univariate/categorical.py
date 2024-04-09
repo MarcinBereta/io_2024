@@ -1,5 +1,7 @@
 import glob
 from time import time
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import math
 import os

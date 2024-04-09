@@ -2,6 +2,8 @@ import glob
 import statistics as st
 from time import time
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from scipy.stats import skew, kurtosis, shapiro
 import os

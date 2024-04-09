@@ -290,7 +290,7 @@ const Visual = ({
     };
 
     const handleTypeChange = async () => {
-        const res = await fetch(`${address}/files/${title}/changeType}`, {
+        const res = await fetch(`${address}/files/${title}/changeType/${varName}`, {
             cache: "no-store",
             method: "POST",
             headers: {

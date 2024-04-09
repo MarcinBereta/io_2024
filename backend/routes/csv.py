@@ -524,3 +524,27 @@ def get_graph(graphpath):
         return response
     except Exception as e:
         return {"error": str(e)}, 400
+
+
+@csv_route.route('/csv/files/<fileid>/changeType/<columnName>', methods=['POST'])
+async def changeType(fileid, columnName):
+    try:
+        for column in csvs[fileid]["cols"]:
+            if column["name"] == columnName:
+                if column["type"] == "number":
+                    column["type"] = "text"
+                    for value in column["values"]:
+                        if value["type"] != "null":
+                            value["value"] = str(value["value"])
+                elif column["type"] == "text":
+                    for value in column["values"]:
+                        if value["type"] != "null":
+                            try:
+                                float(value["value"])
+                            except ValueError:
+                                return {"error": "Column contains non-numeric values"}, 400
+                            value["value"] = float(value["value"])
+                    column["type"] = "number"
+        return {"result": "ok"}
+    except Exception as e:
+        return {"error": str(e)}, 400
