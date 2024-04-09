@@ -129,7 +129,7 @@ def histogram_graph(column, label, userId, fileId):
     return g_path
 
 
-def box_plot(column, label, userId, fileId):
+def box_graph(column, label, userId, fileId):
     fig = plt.figure(figsize =(10, 7))
     plt.boxplot(column, patch_artist = True)
     plt.xlabel(label)
