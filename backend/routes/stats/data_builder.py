@@ -131,7 +131,7 @@ def get_num_cat_data(num_col_csv, cat_col_csv):
             "values": test_val
         },
         {
-            "name": f"{test_name}p:",
+            "name": f"{test_name} p-value:",
             "values": p_val
         },
         {
