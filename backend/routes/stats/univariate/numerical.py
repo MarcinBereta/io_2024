@@ -104,6 +104,7 @@ def get_is_normal_distr(column):
     except:
         return None
 
+
 def histogram_graph(column, label, userId, fileId):
     n, bins, patches = plt.hist(column, bins='auto', color='#0504aa',
                                 alpha=0.7, rwidth=0.85)
@@ -127,7 +128,25 @@ def histogram_graph(column, label, userId, fileId):
     g_path = g_path.replace("\\", "/")
     return g_path
 
-#
-# arr = [1, 1, 1, 20, 30, 31, 31, 22, 22, 12, 30, 49]
-# print(get_is_normal_distr(arr))
-# histogram_graph(arr, 'x')
+
+def box_plot(column, label, userId, fileId):
+    fig = plt.figure(figsize =(10, 7))
+    plt.boxplot(column, patch_artist = True)
+    plt.xlabel(label)
+    plt.ylabel('Value')
+    plt.title(f'Box plot of {label}')
+    plt.tight_layout()
+    plt.show()
+    graphs_directory = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'static', userId, fileId, 'graphs')
+    existing_histograms = glob.glob(os.path.join(graphs_directory, f"{label}_num_box_*.png"))
+    for histogram_path in existing_histograms:
+        os.remove(histogram_path)
+    os.makedirs(graphs_directory, exist_ok=True)
+    file_name = f'{label}_num_box_{time()}.png'
+    path = os.path.join(os.path.dirname(__file__), graphs_directory, file_name)
+    plt.savefig(path)
+    plt.clf()
+    g_path = os.path.join(userId, fileId, 'graphs', file_name)
+    g_path = g_path.replace("\\", "/")
+    return g_path
+

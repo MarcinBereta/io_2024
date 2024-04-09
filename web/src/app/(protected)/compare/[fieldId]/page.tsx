@@ -92,10 +92,14 @@ const Page = async ({
     const data2 = await res2.json();
 
     const res3 = await fetch(
-        `http://127.0.0.1:4000/csv/${fieldId}/data/${col1}/${col2}` // temporary removed
+        `http://127.0.0.1:4000/csv/${fieldId}/data/${col1}/${col2}`,
+        {
+            cache: "no-store",
+            method: "GET",
+        }
     );
 
-    const data3 = await res3.json(); // temporary removed
+    const data3 = await res3.json();
 
     return (
         <div className="w-full h-full">
@@ -106,7 +110,7 @@ const Page = async ({
                     title={fieldId}
                     cols={[col1, col2]}
                     compare={data3}
-                    // graphs={data3} // temporary removed
+                    graphs={data3} // temporary removed
                 />
             </div>
         </div>
