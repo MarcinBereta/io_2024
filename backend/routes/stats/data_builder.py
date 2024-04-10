@@ -114,11 +114,11 @@ def get_cat_cat_data(col1_csv, col2_csv):
         },
         {
             "name": "df:",
-            "values": p_val
+            "values": df
         },
         {
             "name": "p:",
-            "values": df
+            "values": p_val
         }
     ]
     result = round_num_result(result, 3)
