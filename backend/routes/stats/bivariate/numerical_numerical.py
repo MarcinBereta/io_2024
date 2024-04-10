@@ -6,7 +6,6 @@ from time import time
 
 
 def correlation(column1, column2):
-    print(np.corrcoef(column1, column2)[0, 1])
     return np.corrcoef(column1, column2)[0, 1]
 
 

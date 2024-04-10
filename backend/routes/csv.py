@@ -105,7 +105,11 @@ def handle_csv(fileId, path, filename):
         data = {}
         dataKeys = []
         for i, row in enumerate(reader):
-            rowArr = row[0].split(';')
+            if len(row) == 1:
+                rowArr = row[0].split(';')
+            else:
+                connString =''.join(row)
+                rowArr = connString.split(';')
             if i == 0:
                 keys = [key for key in rowArr]
                 keysParsed = [key.replace(" ", "_").replace("/", "(or)") for key in keys]
@@ -216,6 +220,7 @@ async def get_csv_col(fileId, colId):  # one csv
         except Exception as e:
             return {"error": "File not found"}, 400
         finally:
+
             await db.disconnect()
     global userID
     for col in csvFile["cols"]:
@@ -225,7 +230,7 @@ async def get_csv_col(fileId, colId):  # one csv
                                                                   fileId)
             row_null_type_set(fileId)
             return col
-
+    return {"error": "Column not found"}, 400
 
 @csv_route.route('/csv/<fileId>/data/<colId1>/<colId2>', methods=['GET'])
 async def get_csv_cols(fileId, colId1, colId2):
@@ -485,7 +490,6 @@ async def download_csv(fileId):
             where={"id": fileId}
         )
         directory, filename = os.path.split(csv_file.path)
-        print(directory, filename)
         return send_from_directory(directory, filename, as_attachment=True)
     finally:
         if db.is_connected:
@@ -566,7 +570,9 @@ def get_graph(graphpath):
 async def changeType(fileid, columnName):
     try:
         for column in csvs[fileid]["cols"]:
+            print(column['name'], columnName)
             if column["name"] == columnName:
+                print(column['type'])
                 if column["type"] == "number":
                     column["type"] = "text"
                     for value in column["values"]:
@@ -576,11 +582,12 @@ async def changeType(fileid, columnName):
                     for value in column["values"]:
                         if value["type"] != "null":
                             try:
-                                float(value["value"])
+                                value["value"] = float(value["value"])
                             except ValueError:
                                 return {"error": "Column contains non-numeric values"}, 400
-                            value["value"] = float(value["value"])
                     column["type"] = "number"
+            print(column['type'])
         return {"result": "ok"}
     except Exception as e:
+        # print(e)
         return {"error": str(e)}, 400

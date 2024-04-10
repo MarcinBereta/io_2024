@@ -110,7 +110,6 @@ const Page = async ({
                     title={fieldId}
                     cols={[col1, col2]}
                     compare={data3}
-                    graphs={data3} // temporary removed
                 />
             </div>
         </div>

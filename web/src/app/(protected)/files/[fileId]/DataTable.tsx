@@ -65,9 +65,7 @@ const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
     };
 
     return (
-        <div
-            className="m-2 w-full h-full"
-            style={{ maxHeight: "calc(70vh - 2.5rem)" }}>
+        <div className="m-2 w-full h-full" style={{ overflowX: "hidden" }}>
             <div>
                 <h1 className="text-3xl text-white">CSV Data</h1>
                 <div>
@@ -100,78 +98,83 @@ const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
                     Download file with selected cols
                 </div>
             </div>
-            <PerfectScrollbar className="w-full h-full">
-                <div className="flex flex-row ml-10 mb-10">
-                    {data.cols.map((col, index) => {
-                        return (
-                            <div
-                                key={index}
-                                className=" flex flex-col text-white w-auto rounded-e-lg min-w-60">
-                                <div className="flex flex-col justify-center items-center  bg-slate-500 border ">
-                                    {col.name
-                                        .replace("_", " ")
-                                        .replace("(or)", "/")
-                                        .replace("_", " ")
-                                        .replace("/_", "/ ")}
-                                    <div
-                                        onClick={() => {
-                                            if (
-                                                selectedColumns.includes(
-                                                    col.name
-                                                )
-                                            ) {
-                                                setSelectedColumns(
-                                                    selectedColumns.filter(
-                                                        (v) => v !== col.name
+            <div style={{ maxHeight: "calc(80vh - 5rem)" }}>
+                <PerfectScrollbar className="w-full h-full">
+                    <div className="flex flex-row ml-10 mb-10">
+                        {data.cols.map((col, index) => {
+                            return (
+                                <div
+                                    key={index}
+                                    className=" flex flex-col text-white w-auto rounded-e-lg min-w-60">
+                                    <div className="flex flex-col justify-center items-center  bg-slate-500 border ">
+                                        {col.name
+                                            .replace("_", " ")
+                                            .replace("(or)", "/")
+                                            .replace("_", " ")
+                                            .replace("/_", "/ ")}
+                                        <div
+                                            onClick={() => {
+                                                if (
+                                                    selectedColumns.includes(
+                                                        col.name
                                                     )
-                                                );
-                                            } else {
-                                                setSelectedColumns([
-                                                    ...selectedColumns,
-                                                    col.name,
-                                                ]);
-                                            }
-                                        }}
-                                        className="text-white cursor-pointer">
-                                        {selectedColumns.includes(col.name)
-                                            ? "Remove from selection"
-                                            : "Add to selection"}
+                                                ) {
+                                                    setSelectedColumns(
+                                                        selectedColumns.filter(
+                                                            (v) =>
+                                                                v !== col.name
+                                                        )
+                                                    );
+                                                } else {
+                                                    setSelectedColumns([
+                                                        ...selectedColumns,
+                                                        col.name,
+                                                    ]);
+                                                }
+                                            }}
+                                            className="text-white cursor-pointer">
+                                            {selectedColumns.includes(col.name)
+                                                ? "Remove from selection"
+                                                : "Add to selection"}
+                                        </div>
+                                    </div>
+                                    <div
+                                        className="border cursor-pointer h-auto flex flex-col"
+                                        onClick={() => {
+                                            router.push(
+                                                `/files/${file}/${col.name}`
+                                            );
+                                        }}>
+                                        {col.values.map((val, index2) => {
+                                            return (
+                                                <div
+                                                    key={index2}
+                                                    className={cn(
+                                                        " whitespace-nowrap overflow-hidden text-ellipsis text-center min-w-20 w-fill min-h-7 text-white hover:bg-slate-200 hover:text-black",
+                                                        `${
+                                                            val.type ==
+                                                            "row_null"
+                                                                ? "bg-slate-400"
+                                                                : col.type ==
+                                                                  "col_null"
+                                                                ? "bg-slate-500"
+                                                                : val.type ==
+                                                                  "null"
+                                                                ? "bg-slate-700"
+                                                                : "bg-slate-600"
+                                                        }`
+                                                    )}>
+                                                    {val.value as string}
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
-                                <div
-                                    className="border cursor-pointer h-auto flex flex-col"
-                                    onClick={() => {
-                                        router.push(
-                                            `/files/${file}/${col.name}`
-                                        );
-                                    }}>
-                                    {col.values.map((val, index2) => {
-                                        return (
-                                            <div
-                                                key={index2}
-                                                className={cn(
-                                                    " whitespace-nowrap overflow-hidden text-ellipsis text-center min-w-20 w-fill min-h-7 text-white hover:bg-slate-200 hover:text-black",
-                                                    `${
-                                                        val.type == "row_null"
-                                                            ? "bg-slate-400"
-                                                            : col.type ==
-                                                              "col_null"
-                                                            ? "bg-slate-500"
-                                                            : val.type == "null"
-                                                            ? "bg-slate-700"
-                                                            : "bg-slate-600"
-                                                    }`
-                                                )}>
-                                                {val.value as string}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            </PerfectScrollbar>
+                            );
+                        })}
+                    </div>
+                </PerfectScrollbar>
+            </div>
         </div>
     );
 };

@@ -7,12 +7,14 @@ def get_data(col_csv, col_type, col_name, userId, fileId):
     graphs = []
     arr_data = csv_to_arr(col_csv)
     if col_type == 'number':
-        data = get_num_data(col_csv)
-        graphs.append(numerical.histogram_graph(arr_data, col_name, userId, fileId))
-        graphs.append(numerical.box_graph(arr_data, col_name, userId, fileId))
+        print("")
+        # data = get_num_data(col_csv)
+        # graphs.append(numerical.histogram_graph(arr_data, col_name, userId, fileId))
+        # graphs.append(numerical.box_graph(arr_data, col_name, userId, fileId))
     elif col_type == 'text':
-        graphs.append(categorical.count_graph(arr_data, col_name, userId, fileId))
-        graphs.append(categorical.count_perc_graph(arr_data, col_name, userId, fileId))
+        print("")
+        # graphs.append(categorical.count_graph(arr_data, col_name, userId, fileId))
+        # graphs.append(categorical.count_perc_graph(arr_data, col_name, userId, fileId))
     return data, graphs
 
 
@@ -31,9 +33,7 @@ def get_data2d(col1_csv, col1_type, col1_name, col2_csv, col2_type, col2_name, u
         graphs.append(numerical_categorical.error_bar_graph(arr2_data, col2_name, arr1_data, col1_name, userId, fileId))
     elif col1_type == 'text' and col2_type == 'text':
         data = get_cat_cat_data(col1_csv, col2_csv)
-        print(data)
-        print(col1_csv)
-        print(col2_csv)
+
         graphs.append(categorical_categorical.stacked_column_chart(arr1_data, col1_name,arr2_data, col2_name, userId, fileId))
         graphs.append(categorical_categorical.stacked_column_chart(arr2_data, col2_name, arr1_data, col1_name, userId, fileId))
     return data, graphs
@@ -171,7 +171,6 @@ def round_num_result(arr, comma):
 
 
 def csv_to_arr(col_csv):
-    print(col_csv)
     column = []
     for pair_val in col_csv:
         if pair_val['value'] is not None:
@@ -180,8 +179,6 @@ def csv_to_arr(col_csv):
 
 
 def csv2d_to_arr(col1_csv, col2_csv):
-    print(col1_csv)
-    print(col2_csv)
     column1 = []
     column2 = []
     for pair1_val, pair2_val in zip(col1_csv, col2_csv):

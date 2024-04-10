@@ -290,7 +290,7 @@ const Visual = ({
     };
 
     const handleTypeChange = async () => {
-        const res = await fetch(`${address}/files/${title}/changeType/${varName}`, {
+        const res = await fetch(`${address}/files/${title}/changeType/${col}`, {
             cache: "no-store",
             method: "POST",
             headers: {
@@ -298,7 +298,7 @@ const Visual = ({
             },
         });
         if (res.status == 200 || res.status == 201) {
-            router.push(`/files/${title}/${varName}`);
+            router.push(`/files/${title}/${col}`);
             router.refresh();
         } else if (res.status == 409) {
             alert("Column name already exists");
