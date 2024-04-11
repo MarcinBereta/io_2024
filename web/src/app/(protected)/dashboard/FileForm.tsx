@@ -28,9 +28,7 @@ const FileForm = () => {
             method: "POST",
             body: form,
         });
-        console.log(res);
         const data = await res.json();
-        console.log(data.fileId);
         router.push(`/files/${data.fileId}`);
     };
 

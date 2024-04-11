@@ -289,6 +289,8 @@ const Visual = ({
         return arr;
     };
 
+    console.log(data.graphs);
+
     const handleTypeChange = async () => {
         const res = await fetch(`${address}/files/${title}/changeType/${col}`, {
             cache: "no-store",
