@@ -28,9 +28,9 @@ const Page = async () => {
         <div className="w-full h-full">
             <div className="w-full h-full flex justify-center items-center flex-col">
                 <FileForm />
-                {csvFiles.map((file) => {
+                {csvFiles.map((file, index) => {
                     return (
-                        <Link href={`/files/${file.id}`}>
+                        <Link key={index} href={`/files/${file.id}`}>
                             <div className="text-white p-2">{file.name}</div>
                         </Link>
                     );
