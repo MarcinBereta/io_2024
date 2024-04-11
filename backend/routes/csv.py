@@ -563,6 +563,7 @@ def get_graph(graphpath):
 
         return response
     except Exception as e:
+        print(e)
         return {"error": str(e)}, 400
 
 
