@@ -10,7 +10,7 @@ const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
     const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
     const handleClick = async (type: "rows" | "cols") => {
         const res = await fetch(
-            `http://192.168.0.127:4000/csv/${file}/fix${type}`,
+            `http://89.70.53.193:4000/csv/${file}/fix${type}`,
             {
                 cache: "no-store",
             }
@@ -22,7 +22,7 @@ const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
 
     const handleDownload = async () => {
         const res = await fetch(
-            `http://192.168.0.127:4000/csv/${file}/download`,
+            `http://89.70.53.193:4000/csv/${file}/download`,
             {
                 cache: "no-store",
                 method: "GET",
@@ -39,7 +39,7 @@ const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
             return;
         }
         const res = await fetch(
-            `http://192.168.0.127:4000/csv/${file}/downloadSelected`,
+            `http://89.70.53.193:4000/csv/${file}/downloadSelected`,
             {
                 method: "POST",
                 cache: "no-store",
@@ -52,7 +52,7 @@ const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
         if (res.status == 200 || res.status == 201) {
             const data = await res.json();
             const newFile = await fetch(
-                `http://192.168.0.127:4000/csv/${file}/downloadSelected/${data.file}`,
+                `http://89.70.53.193:4000/csv/${file}/downloadSelected/${data.file}`,
                 {
                     method: "GET",
                     cache: "no-store",

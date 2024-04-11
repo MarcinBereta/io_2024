@@ -74,7 +74,7 @@ const Page = async ({
     };
 }) => {
     const res = await fetch(
-        `http://192.168.0.127:4000/csv/${fieldId}/data/${col1}`,
+        `http://89.70.53.193:4000/csv/${fieldId}/data/${col1}`,
         {
             cache: "no-store",
             method: "GET",
@@ -83,7 +83,7 @@ const Page = async ({
     const data = await res.json();
 
     const res2 = await fetch(
-        `http://192.168.0.127:4000/csv/${fieldId}/data/${col2}`,
+        `http://89.70.53.193:4000/csv/${fieldId}/data/${col2}`,
         {
             cache: "no-store",
             method: "GET",
@@ -92,7 +92,7 @@ const Page = async ({
     const data2 = await res2.json();
 
     const res3 = await fetch(
-        `http://192.168.0.127:4000/csv/${fieldId}/data/${col1}/${col2}`,
+        `http://89.70.53.193:4000/csv/${fieldId}/data/${col1}/${col2}`,
         {
             cache: "no-store",
             method: "GET",
