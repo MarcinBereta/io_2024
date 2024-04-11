@@ -140,7 +140,7 @@ const Visual = ({
                 {compare.graphs.map((graph, index) => (
                     <Image
                         key={`${graph}_${index}`}
-                        src={`http://127.0.0.1:4000/csv/${graph}`}
+                        src={`http://192.168.0.127:4000/csv/${graph}`}
                         alt={`graph_${index}`}
                         width={600}
                         height={500}

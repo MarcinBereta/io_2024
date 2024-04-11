@@ -72,7 +72,7 @@ const Page = async ({
     };
 }) => {
     // const data = generateMockData();
-    const res = await fetch(`http://127.0.0.1:4000/csv/${fileId}`, {
+    const res = await fetch(`http://192.168.0.127:4000/csv/${fileId}`, {
         cache: "no-store",
     });
     const data = (await res.json()) as CSVFile;
