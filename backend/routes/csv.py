@@ -551,7 +551,7 @@ async def download_csv_with_selected_values(fileId, newFileId):
 @csv_route.route('/csv/<path:graphpath>', methods=['GET'])
 def get_graph(graphpath):
     try:
-        graphpath = graphpath.replace("/", "\\")
+        # graphpath = graphpath.replace("/", "\\")
         directory = os.path.join('static', graphpath)
 
         response = send_file(directory, environ=request.environ)
