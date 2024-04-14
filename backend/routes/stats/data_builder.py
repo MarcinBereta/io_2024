@@ -36,6 +36,7 @@ def get_data2d(col1_csv, col1_type, col1_name, col2_csv, col2_type, col2_name, u
 
         graphs.append(categorical_categorical.stacked_column_chart(arr1_data, col1_name,arr2_data, col2_name, userId, fileId))
         graphs.append(categorical_categorical.stacked_column_chart(arr2_data, col2_name, arr1_data, col1_name, userId, fileId))
+
     return data, graphs
 
 

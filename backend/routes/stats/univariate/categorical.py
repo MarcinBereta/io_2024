@@ -22,9 +22,7 @@ def count(column):
 
 def count_graph(column, label, userId, fileId):
     cat, quantity = count(column)
-
     yint = range(min(quantity), math.ceil(max(quantity)) + 1)
-
     plt.bar(cat, quantity)
     plt.xlabel("Categories")
     plt.xticks(rotation=30)
@@ -33,13 +31,11 @@ def count_graph(column, label, userId, fileId):
     plt.title(f"Number of {label}")
     plt.tight_layout()
     graphs_directory = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'static', userId, fileId, 'graphs')
-    existing_histograms = glob.glob(os.path.join(graphs_directory, f"{label}_num_hist_*.png"))
+    existing_histograms = glob.glob(os.path.join(graphs_directory, f"{label}_cat_count_*.png"))
     for histogram_path in existing_histograms:
         os.remove(histogram_path)
     os.makedirs(graphs_directory, exist_ok=True)
-
-
-    file_name = f'{label}_cat_count.png'
+    file_name = f'{label}_cat_count_{time()}.png'
     path = os.path.join(os.path.dirname(__file__), graphs_directory, file_name)
     plt.savefig(path)
     plt.clf()
@@ -57,7 +53,7 @@ def count_perc_graph(column, label, userId, fileId):
     plt.axis('equal')
     plt.tight_layout()
     graphs_directory = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'static', userId, fileId, 'graphs')
-    existing_histograms = glob.glob(os.path.join(graphs_directory, f"{label}_num_hist_*.png"))
+    existing_histograms = glob.glob(os.path.join(graphs_directory, f"{label}_cat_count_perc_*.png"))
     for histogram_path in existing_histograms:
         os.remove(histogram_path)
     os.makedirs(graphs_directory, exist_ok=True)

@@ -69,7 +69,7 @@ def error_bar_graph(num_column, num_label, cat_column, cat_label, userId, fileId
     plt.grid()
     plt.tight_layout()
     graphs_directory = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'static', userId, fileId, 'graphs')
-    existing_histograms = glob.glob(os.path.join(graphs_directory, f"{num_label}_{cat_label}_num_cat_err_*.png"))
+    existing_histograms = glob.glob(os.path.join(graphs_directory, f"{num_label}_{cat_label}_cat_cat_stacked_*.png"))
     for histogram_path in existing_histograms:
         os.remove(histogram_path)
     os.makedirs(graphs_directory, exist_ok=True)

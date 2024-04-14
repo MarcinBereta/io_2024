@@ -94,7 +94,9 @@ def parse_value(v):
 def set_column_type(column):
     if all(value['value'] == "" for value in column) or all(value['value'] is None for value in column):
         return "col_null"
-    elif any(is_float(value['value']) or is_int(value['value']) or value['value'] == ""  or value['value'] is None for value in column):
+    elif all(is_float(value['value']) or is_int(value['value']) or value['value'] == "" or value['value'] is None for value in column):
+        for value in column:
+            print(value)
         return "number"
     else:
         return "text"
@@ -255,6 +257,7 @@ async def get_csv_cols(fileId, colId1, colId2):
     for col in csvFile["cols"]:
         if col["name"] == colId1 or col["name"] == colId2:
             found_cols.append(col)
+            print(found_cols)
             if len(found_cols) == 2:
                 delete_row_null_type(fileId)
                 pair_obj = {
@@ -264,6 +267,7 @@ async def get_csv_cols(fileId, colId1, colId2):
                     "details": [],
                     "graphs": []
                 }
+
                 pair_obj["details"], pair_obj["graphs"] = data_builder.get_data2d(found_cols[0]["values"],
                                                                                   found_cols[0]["type"],
                                                                                   found_cols[0]["name"],
@@ -458,8 +462,12 @@ async def update_column(fileId, columnName):
                             column["values"][i]["value"] = parse_value(value)[0]
                             column["values"][i]["type"] = types
                     else:
-                        column["values"][i]["value"] = str(parse_value(value)[0])
-                        column["values"][i]["type"] = types
+                        if value is not None:
+                            column["values"][i]["value"] = str(parse_value(value)[0])
+                            column["values"][i]["type"] = types
+                        else:
+                            column["values"][i]["value"] = None
+                            column["values"][i]["type"] = "null"
                 column["type"] = set_column_type(column["values"])
                 return csvs[fileId]
         return {"error": "Column not found"}, 400
@@ -581,13 +589,14 @@ async def changeType(fileid, columnName):
     try:
         for column in csvs[fileid]["cols"]:
             if column["name"] == columnName:
-                print(column['type'])
                 if column["type"] == "number":
                     column["type"] = "text"
                     for value in column["values"]:
                         if value["type"] != "null":
-                            print(str(value["value"]))
-                            value["value"] = str(value["value"])
+                            if value["value"] is not None:
+                                value["value"] = str(value["value"])
+                            else:
+                                value["value"] = None
                 elif column["type"] == "text":
                     for value in column["values"]:
                         if value["value"] is not None:
@@ -595,10 +604,12 @@ async def changeType(fileid, columnName):
                                 return {"error": "Column contains non-numeric values"}, 400
                     for value in column["values"]:
                         if value["value"] is not None:
-                            print(value, "Zmieniono na float")
                             value["value"] = float(value["value"])
+                        else:
+                            value["value"] = None
+
                     column["type"] = "number"
-                print(column)
+
         return {"result": "ok"}
     except Exception as e:
         # print(e)

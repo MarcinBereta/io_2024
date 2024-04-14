@@ -136,7 +136,7 @@ def box_graph(column, label, userId, fileId):
     plt.ylabel('Value')
     plt.title(f'Box plot of {label}')
     plt.tight_layout()
-    plt.show()
+
     graphs_directory = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'static', userId, fileId, 'graphs')
     existing_histograms = glob.glob(os.path.join(graphs_directory, f"{label}_num_box_*.png"))
     for histogram_path in existing_histograms:
