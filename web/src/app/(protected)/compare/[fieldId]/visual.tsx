@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { CSVColumnDetailed, CSVCompareDetailed } from "@/types";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const dataFormatter = (number: number) =>
     Intl.NumberFormat("us").format(number).toString();
@@ -20,11 +21,19 @@ const Visual = ({
     cols: string[];
     compare: CSVCompareDetailed;
 }) => {
+    const router = useRouter();
     return (
         <div className="flex flex-col w-full h-full ">
             <div className="flex flex-row justify-center text-white">
                 <div className=" text-2xl">{title}</div>
             </div>
+            <button
+                className="w-1/5 text-white p-3 rounded hover:border-gray-600 text-xl bg-slate-400 ml-4"
+                onClick={() => {
+                    router.push(`/files/${title}`);
+                }}>
+                Back
+            </button>
             <div className="flex flex-row justify-around m-2">
                 {cols.map((col, index) => {
                     return (
@@ -140,7 +149,7 @@ const Visual = ({
                 {compare.graphs.map((graph, index) => (
                     <Image
                         key={`${graph}_${index}`}
-                        src={`http://89.70.53.193:4000/csv/${graph}`}
+                        src={`http://127.0.0.1:4000/csv/${graph}`}
                         alt={`graph_${index}`}
                         width={600}
                         height={500}

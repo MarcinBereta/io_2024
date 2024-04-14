@@ -70,9 +70,10 @@ const Page = async ({
     params: {
         fileId: string;
     };
+
 }) => {
     // const data = generateMockData();
-    const res = await fetch(`http://89.70.53.193:4000/csv/${fileId}`, {
+    const res = await fetch(`http://127.0.0.1:4000/csv/${fileId}`, {
         cache: "no-store",
     });
     const data = (await res.json()) as CSVFile;
@@ -82,6 +83,7 @@ const Page = async ({
             <div className="w-full h-full flex justify-center items-center">
                 <DataTable data={data} file={fileId} />
             </div>
+
         </div>
     );
 };

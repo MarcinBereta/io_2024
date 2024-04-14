@@ -24,7 +24,7 @@ const FileForm = () => {
         const form = new FormData();
         form.append("file", file);
         form.append("userId", user?.id || "");
-        const res = await fetch("http://89.70.53.193:4000/csv", {
+        const res = await fetch("http://127.0.0.1:4000/csv", {
             method: "POST",
             body: form,
         });

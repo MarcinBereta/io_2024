@@ -7,7 +7,7 @@ import { useState } from "react";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-const address = "http://89.70.53.193:4000/csv";
+const address = "http://127.0.0.1:4000/csv";
 
 const Visual = ({
     data,
@@ -305,6 +305,9 @@ const Visual = ({
         } else if (res.status == 409) {
             alert("Column name already exists");
         }
+        else if(res.status == 400){
+            alert("Cannot change type of columns")
+        }
     };
 
     return (
@@ -451,9 +454,13 @@ const Visual = ({
                                                 }=${val}&`;
                                             });
                                             path = path.slice(0, -1);
+                                            if (compareContext.compares[key].length > 1 && compareContext.compares[key][0] != compareContext.compares[key][1]){
                                             router.push(
                                                 `/compare/${title}${path}`
-                                            );
+                                            );}
+                                            else{
+                                                alert("Select two different columns to compare");
+                                            }
                                         }}
                                         className="text-white cursor-pointer p-2 ">
                                         {key}
@@ -479,7 +486,7 @@ const Visual = ({
                 {data.graphs.map((graph, index) => (
                     <Image
                         key={`${graph}_${index}`}
-                        src={`http://89.70.53.193:4000/csv/${graph}`}
+                        src={`http://127.0.0.1:4000/csv/${graph}`}
                         alt={`graph_${index}`}
                         width={600}
                         height={500}

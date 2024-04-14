@@ -10,7 +10,7 @@ const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
     const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
     const handleClick = async (type: "rows" | "cols") => {
         const res = await fetch(
-            `http://89.70.53.193:4000/csv/${file}/fix${type}`,
+            `http://127.0.0.1:4000/csv/${file}/fix${type}`,
             {
                 cache: "no-store",
             }
@@ -22,7 +22,7 @@ const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
 
     const handleDownload = async () => {
         const res = await fetch(
-            `http://89.70.53.193:4000/csv/${file}/download`,
+            `http://127.0.0.1:4000/csv/${file}/download`,
             {
                 cache: "no-store",
                 method: "GET",
@@ -39,7 +39,7 @@ const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
             return;
         }
         const res = await fetch(
-            `http://89.70.53.193:4000/csv/${file}/downloadSelected`,
+            `http://127.0.0.1:4000/csv/${file}/downloadSelected`,
             {
                 method: "POST",
                 cache: "no-store",
@@ -52,7 +52,7 @@ const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
         if (res.status == 200 || res.status == 201) {
             const data = await res.json();
             const newFile = await fetch(
-                `http://89.70.53.193:4000/csv/${file}/downloadSelected/${data.file}`,
+                `http://127.0.0.1:4000/csv/${file}/downloadSelected/${data.file}`,
                 {
                     method: "GET",
                     cache: "no-store",
@@ -69,6 +69,7 @@ const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
 
     return (
         <div className="m-2 w-full h-full" style={{ overflowX: "hidden" }}>
+            <PerfectScrollbar className="w-full h-full">
             <div>
                 <h1 className="text-3xl text-white">CSV Data</h1>
                 <div>
@@ -101,8 +102,9 @@ const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
                     Download file with selected cols
                 </div>
             </div>
+
             <div style={{ maxHeight: "calc(80vh - 5rem)" }}>
-                <PerfectScrollbar className="w-full h-full">
+
                     <div className="flex flex-row ml-10 mb-10">
                         {data.cols.map((col, index) => {
                             return (
@@ -176,9 +178,11 @@ const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
                             );
                         })}
                     </div>
-                </PerfectScrollbar>
-            </div>
+
+                </div>
+            </PerfectScrollbar>
         </div>
+
     );
 };
 export { DataTable };

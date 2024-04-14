@@ -8,6 +8,7 @@ import csv
 import shutil
 import json
 from stats import data_builder
+import re
 
 csv_route = Blueprint('csv', __name__)
 STORAGE_CSV = '.\static'
@@ -93,7 +94,7 @@ def parse_value(v):
 def set_column_type(column):
     if all(value['value'] == "" for value in column) or all(value['value'] is None for value in column):
         return "col_null"
-    elif any(is_float(value['value']) or is_int(value['value']) for value in column):
+    elif any(is_float(value['value']) or is_int(value['value']) or value['value'] == ""  or value['value'] is None for value in column):
         return "number"
     else:
         return "text"
@@ -447,11 +448,19 @@ async def update_column(fileId, columnName):
                     column["name"] = data["name"]
                 else:
                     return {"error": f"Column with name '{data['name']}' already exists."}, 409
+                if all(is_float(value) or is_int(value) for value in data['values']):
+                    types = "number"
+                else:
+                    types = "text"
                 for i, value in enumerate(data['values']):
-                    column["values"][i]["value"] = parse_value(value)[0]
-                    column["values"][i]["type"] = parse_value(value)[1]
+                    if types == "number":
+                        if parse_value(value)[0] is not None:
+                            column["values"][i]["value"] = parse_value(value)[0]
+                            column["values"][i]["type"] = types
+                    else:
+                        column["values"][i]["value"] = str(parse_value(value)[0])
+                        column["values"][i]["type"] = types
                 column["type"] = set_column_type(column["values"])
-
                 return csvs[fileId]
         return {"error": "Column not found"}, 400
     except Exception as e:
@@ -571,23 +580,25 @@ def get_graph(graphpath):
 async def changeType(fileid, columnName):
     try:
         for column in csvs[fileid]["cols"]:
-            print(column['name'], columnName)
             if column["name"] == columnName:
                 print(column['type'])
                 if column["type"] == "number":
                     column["type"] = "text"
                     for value in column["values"]:
                         if value["type"] != "null":
+                            print(str(value["value"]))
                             value["value"] = str(value["value"])
                 elif column["type"] == "text":
                     for value in column["values"]:
-                        if value["type"] != "null":
-                            try:
-                                value["value"] = float(value["value"])
-                            except ValueError:
+                        if value["value"] is not None:
+                            if not re.match(r'^-?\d+\.?\d*$', value["value"]):
                                 return {"error": "Column contains non-numeric values"}, 400
+                    for value in column["values"]:
+                        if value["value"] is not None:
+                            print(value, "Zmieniono na float")
+                            value["value"] = float(value["value"])
                     column["type"] = "number"
-            print(column['type'])
+                print(column)
         return {"result": "ok"}
     except Exception as e:
         # print(e)
