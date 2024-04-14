@@ -14,4 +14,4 @@ from routes.csv import csv_route
 app.register_blueprint(csv_route)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=4000)
+    app.run(debug=True, port=3051)

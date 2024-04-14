@@ -110,7 +110,7 @@ const Page = async ({
     };
 }) => {
     const res = await fetch(
-        `http://127.0.0.1:4000/csv/${fileId}/data/${columnId}`,
+        `http://95.217.87.137:3051/csv/${fileId}/data/${columnId}`,
         {
             cache: "no-store",
             method: "GET",

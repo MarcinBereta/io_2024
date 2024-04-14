@@ -74,7 +74,7 @@ const Page = async ({
     };
 }) => {
     const res = await fetch(
-        `http://127.0.0.1:4000/csv/${fieldId}/data/${col1}`,
+        `http://95.217.87.137:3051/csv/${fieldId}/data/${col1}`,
         {
             cache: "no-store",
             method: "GET",
@@ -83,7 +83,7 @@ const Page = async ({
     const data = await res.json();
 
     const res2 = await fetch(
-        `http://127.0.0.1:4000/csv/${fieldId}/data/${col2}`,
+        `http://95.217.87.137:3051/csv/${fieldId}/data/${col2}`,
         {
             cache: "no-store",
             method: "GET",
@@ -92,20 +92,20 @@ const Page = async ({
     const data2 = await res2.json();
 
     const res3 = await fetch(
-        `http://127.0.0.1:4000/csv/${fieldId}/data/${col1}/${col2}`,
+        `http://95.217.87.137:3051/csv/${fieldId}/data/${col1}/${col2}`,
         {
             cache: "no-store",
             method: "GET",
         }
     );
-    console.log(res3)
+    console.log(res3);
     let data23 = await res3.text();
 
     // Zamień "Infinity" na null
-    data23 = data23.replace(/Infinity/g, 'null');
-    data23 = data23.replace(/NaN/g, 'null');
-    console.log(data23)
-   let data3 = JSON.parse(data23);
+    data23 = data23.replace(/Infinity/g, "null");
+    data23 = data23.replace(/NaN/g, "null");
+    console.log(data23);
+    let data3 = JSON.parse(data23);
 
     return (
         <div className="w-full h-full">

@@ -10,7 +10,7 @@ const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
     const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
     const handleClick = async (type: "rows" | "cols") => {
         const res = await fetch(
-            `http://127.0.0.1:4000/csv/${file}/fix${type}`,
+            `http://95.217.87.137:3051/csv/${file}/fix${type}`,
             {
                 cache: "no-store",
             }
@@ -22,7 +22,7 @@ const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
 
     const handleDownload = async () => {
         const res = await fetch(
-            `http://127.0.0.1:4000/csv/${file}/download`,
+            `http://95.217.87.137:3051/csv/${file}/download`,
             {
                 cache: "no-store",
                 method: "GET",
@@ -39,7 +39,7 @@ const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
             return;
         }
         const res = await fetch(
-            `http://127.0.0.1:4000/csv/${file}/downloadSelected`,
+            `http://95.217.87.137:3051/csv/${file}/downloadSelected`,
             {
                 method: "POST",
                 cache: "no-store",
@@ -52,7 +52,7 @@ const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
         if (res.status == 200 || res.status == 201) {
             const data = await res.json();
             const newFile = await fetch(
-                `http://127.0.0.1:4000/csv/${file}/downloadSelected/${data.file}`,
+                `http://95.217.87.137:3051/csv/${file}/downloadSelected/${data.file}`,
                 {
                     method: "GET",
                     cache: "no-store",
@@ -70,41 +70,42 @@ const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
     return (
         <div className="m-2 w-full h-full" style={{ overflowX: "hidden" }}>
             <PerfectScrollbar className="w-full h-full">
-            <div>
-                <h1 className="text-3xl text-white">CSV Data</h1>
                 <div>
-                    <h2 className="text-xl text-white">Name: {data.name}</h2>
+                    <h1 className="text-3xl text-white">CSV Data</h1>
+                    <div>
+                        <h2 className="text-xl text-white">
+                            Name: {data.name}
+                        </h2>
+                    </div>
                 </div>
-            </div>
-            <div className="flex flex-row justify-around my-2">
-                <div
-                    className="flex p-2 text-white cursor-pointer bg-slate-500 rounded-2xl"
-                    onClick={() => {
-                        handleClick("cols");
-                    }}>
-                    Remove empty columns
+                <div className="flex flex-row justify-around my-2">
+                    <div
+                        className="flex p-2 text-white cursor-pointer bg-slate-500 rounded-2xl"
+                        onClick={() => {
+                            handleClick("cols");
+                        }}>
+                        Remove empty columns
+                    </div>
+                    <div
+                        className="flex p-2 text-white cursor-pointer bg-slate-500 rounded-2xl"
+                        onClick={() => {
+                            handleClick("rows");
+                        }}>
+                        Remove empty rows
+                    </div>
+                    <div
+                        className="flex p-2 text-white cursor-pointer bg-slate-500 rounded-2xl"
+                        onClick={handleDownload}>
+                        Download file
+                    </div>
+                    <div
+                        className="flex p-2 text-white cursor-pointer bg-slate-500 rounded-2xl"
+                        onClick={handleDownloadSelectedCols}>
+                        Download file with selected cols
+                    </div>
                 </div>
-                <div
-                    className="flex p-2 text-white cursor-pointer bg-slate-500 rounded-2xl"
-                    onClick={() => {
-                        handleClick("rows");
-                    }}>
-                    Remove empty rows
-                </div>
-                <div
-                    className="flex p-2 text-white cursor-pointer bg-slate-500 rounded-2xl"
-                    onClick={handleDownload}>
-                    Download file
-                </div>
-                <div
-                    className="flex p-2 text-white cursor-pointer bg-slate-500 rounded-2xl"
-                    onClick={handleDownloadSelectedCols}>
-                    Download file with selected cols
-                </div>
-            </div>
 
-            <div style={{ maxHeight: "calc(80vh - 5rem)" }}>
-
+                <div style={{ maxHeight: "calc(80vh - 5rem)" }}>
                     <div className="flex flex-row ml-10 mb-10">
                         {data.cols.map((col, index) => {
                             return (
@@ -178,11 +179,9 @@ const DataTable = ({ data, file }: { data: CSVFile; file: string }) => {
                             );
                         })}
                     </div>
-
                 </div>
             </PerfectScrollbar>
         </div>
-
     );
 };
 export { DataTable };
