@@ -72,7 +72,13 @@ def error_bar_graph(num_column, num_label, cat_column, cat_label, userId, fileId
         means.append(mean)
         std_errors.append(std_error)
 
-    plt.errorbar(categories, means, yerr=std_errors, fmt='-o', color='blue', ecolor='red', capsize=5)
+    try:
+        plt.plot(categories, means, '-o', color='blue')  # Rysowanie wykresu punktowego
+        plt.errorbar(categories, means, yerr=std_errors, fmt='-o', color='blue', ecolor='red', capsize=5)
+    except StopIteration:
+        print("Uwaga: przerywanie rysowania wykresu z powodu StopIteration")
+        pass
+
     plt.xlabel(f"{cat_label}")
     plt.ylabel(f"{num_label}")
     plt.title(f"Error bar graph of {num_label} vs {cat_label}")

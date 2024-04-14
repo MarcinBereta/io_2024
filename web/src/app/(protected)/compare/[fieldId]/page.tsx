@@ -103,7 +103,8 @@ const Page = async ({
 
     // Zamień "Infinity" na null
     data23 = data23.replace(/Infinity/g, 'null');
-
+    data23 = data23.replace(/NaN/g, 'null');
+    console.log(data23)
    let data3 = JSON.parse(data23);
 
     return (
