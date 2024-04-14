@@ -22,12 +22,13 @@ def count(column):
 
 def count_graph(column, label, userId, fileId):
     cat, quantity = count(column)
-    yint = range(min(quantity), math.ceil(max(quantity)) + 1)
+    yint = range(0, math.ceil(max(quantity)) + 1, max(1, math.ceil(max(quantity) / 10)))  # Ustaw krok dla etykiet
     plt.bar(cat, quantity)
     plt.xlabel("Categories")
     plt.xticks(rotation=30)
     plt.ylabel("Count")
     plt.yticks(yint)
+    plt.ylim([0, max(quantity) + 1])
     plt.title(f"Number of {label}")
     plt.tight_layout()
     graphs_directory = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'static', userId, fileId, 'graphs')

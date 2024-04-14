@@ -12,8 +12,8 @@ def correlation(column1, column2):
 def correlation_graph(column1, label1, column2, label2, userId, fileId):
     plt.scatter(column1, column2)
     plt.title("Scatter plot")
-    plt.xlabel('column1')
-    plt.ylabel('column2')
+    plt.xlabel(label1)
+    plt.ylabel(label2)
     plt.grid()
     graphs_directory = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'static', userId, fileId, 'graphs')
     existing_histograms = glob.glob(os.path.join(graphs_directory, f"{label1}_{label2}_num_num_corr_*.png"))

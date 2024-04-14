@@ -7,28 +7,29 @@ from time import time
 
 
 def param_test(num_column, cat_column):
-    no_observations = len(num_column)
     unique_cats = set(cat_column)
-    if no_observations > 30 and len(unique_cats) >= 2:
-        return _t_test(num_column, cat_column)
+    if len(unique_cats) < 2:
+        return 0, 0, 0
+
+    cat1, cat2, group1, group2 = choose_2categories(num_column, cat_column)
+    no_observations = len(group1)
+
+    if no_observations > 30:
+        val, p_val = _z_test(group1, group2)
+        return 'z', cat1, cat2, val, p_val
     elif no_observations <= 30:
-        return _z_test(num_column, cat_column)
+        val, p_val = _t_test(group1, group2)
+        return 't', cat1, cat2, val, p_val
 
 
-def _z_test(num_column, cat_column):
-    val, p_val = None, None
-    test_name = 'z'
-    try:
-        val, p_val = stats.ranksums(num_column, cat_column)
-    except ValueError:
-        pass
-    return test_name, val, p_val
+def _z_test(group1, group2):
+    val, p_val = stats.ranksums(group1, group2)
+    return val, p_val
 
 
-def _t_test(num_column, cat_column):
-    val, p_val = stats.ttest_ind(num_column, cat_column)
-    test_name = 't'
-    return test_name, val, p_val
+def _t_test(group1, group2):
+    val, p_val = stats.ttest_ind(group1, group2)
+    return val, p_val
 
 
 def anova_test(num_column, cat_column):
@@ -41,6 +42,15 @@ def anova_test(num_column, cat_column):
 
     f_val, p_val = stats.f_oneway(*groups)
     return f_val, p_val
+
+
+def choose_2categories(num_column, cat_column):
+    unique_cats = list(set(cat_column))
+
+    group1 = [num for num, cat in zip(num_column, cat_column) if cat == unique_cats[0]]
+    group2 = [num for num, cat in zip(num_column, cat_column) if cat == unique_cats[1]]
+
+    return unique_cats[0], unique_cats[1], group1, group2
 
 
 def error_bar_graph(num_column, num_label, cat_column, cat_label, userId, fileId):

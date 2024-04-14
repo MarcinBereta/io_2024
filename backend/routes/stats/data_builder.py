@@ -36,7 +36,6 @@ def get_data2d(col1_csv, col1_type, col1_name, col2_csv, col2_type, col2_name, u
 
         graphs.append(categorical_categorical.stacked_column_chart(arr1_data, col1_name,arr2_data, col2_name, userId, fileId))
         graphs.append(categorical_categorical.stacked_column_chart(arr2_data, col2_name, arr1_data, col1_name, userId, fileId))
-
     return data, graphs
 
 
@@ -128,23 +127,23 @@ def get_cat_cat_data(col1_csv, col2_csv):
 
 def get_num_cat_data(num_col_csv, cat_col_csv):
     num_col, cat_col = csv2d_to_arr(num_col_csv, cat_col_csv)
-    test_name, test_val, p_val = numerical_categorical.param_test(num_col, cat_col)
+    test_name, cat1, cat2, test_val, p_val = numerical_categorical.param_test(num_col, cat_col)
     anova_f_val, anova_p_val = numerical_categorical.anova_test(num_col, cat_col)
     result = [
         {
-            "name": f"{test_name}-test value:",
+            "name": f"{test_name}-test value for {cat1} and {cat2}:",
             "values": test_val
         },
         {
-            "name": f"{test_name}-test p-value:",
+            "name": f"{test_name}-test p-value for {cat1} and {cat2}:",
             "values": p_val
         },
         {
-            "name": "ANOVA F-value:",
+            "name": "ANOVA F-value for every category:",
             "values": anova_f_val
         },
         {
-            "name": "ANOVA p-value:",
+            "name": "ANOVA p-value for every category:",
             "values": anova_p_val
         }
     ]
