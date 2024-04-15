@@ -24,12 +24,14 @@ Oczekiwane funkcjonalności:
 **Tymczasowo projekt jest postawiony na serwerze pod adresem `http://95.217.87.137:3050/`. Po wejściu na tą stronę wystarczy się tylko zarejsetrować i można korzystać ze wszytskich funkcjonalności. Projekt znajduje się na serwerze, aby ułatwić sprawdzanie prowadzącym przedmiot, w późniejszym czasie zostanie on zdjęty i trzeba będzie korzystać z wersji localhost.**
 
 ### Jak uruchomić wersję localhost (po wyłączniu na serwerze)
+Poniższe kroki zalecamy wykonywać w systemie Windows, gdyż projekt był pisany właśnie na nim. 
 
 Potrzebne narzędzie i programy:
 
 - Docker
 - NPM
-- Python
+- Python 3.9
+- Terminal systemu
 
 Najpierw należy pobrać program Docker Desktop oraz archiwum 'Data_explorer - wersja localhost'.
 Następnie w głównym katalogu projektu należy uruchomić następujące komendy:
